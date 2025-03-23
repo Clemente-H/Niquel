@@ -2,23 +2,15 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copiar requirements primero para aprovechar cache de Docker
+# Copy requirements and install dependencies
 COPY requirements.txt .
-
-# Instalar dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el código de la aplicación
+# Copy the rest of the application
 COPY . .
 
-# Configurar variables de entorno
-ENV PYTHONPATH=/app
-ENV PORT=8000
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Create upload directory if it doesn't exist
+RUN mkdir -p ./data/uploads
 
-# Exponer puerto
-EXPOSE $PORT
-
-# Comando para ejecutar la aplicación
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Run the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
