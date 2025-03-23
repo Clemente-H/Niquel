@@ -14,7 +14,7 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 /**
  * Props para el componente Button
  */
-interface IButtonProps extends IBaseComponentProps, 
+interface IButtonProps extends IBaseComponentProps,
   React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -29,16 +29,16 @@ interface IButtonProps extends IBaseComponentProps,
  * Componente Button reutilizable
  * Soporta diferentes variantes y tamaños
  */
-const Button: React.FC<IButtonProps> = ({ 
-  variant = 'primary', 
-  size = 'md', 
-  children, 
-  leftIcon, 
-  rightIcon, 
+const Button: React.FC<IButtonProps> = ({
+  variant = 'primary',
+  size = 'md',
+  children,
+  leftIcon,
+  rightIcon,
   className = '',
   isLoading = false,
   isDisabled = false,
-  ...props 
+  ...props
 }) => {
   // Configuración de variantes (colores)
   const variantClasses: Record<ButtonVariant, string> = {

@@ -29,12 +29,12 @@ interface IStatusBadgeProps extends IBaseComponentProps {
 /**
  * Componente StatusBadge para mostrar estados con códigos de color
  */
-const StatusBadge: React.FC<IStatusBadgeProps> = ({ 
-  status, 
-  statusConfig, 
+const StatusBadge: React.FC<IStatusBadgeProps> = ({
+  status,
+  statusConfig,
   size = 'md',
-  className = '', 
-  ...props 
+  className = '',
+  ...props
 }) => {
   // Configuraciones predeterminadas para diferentes tipos de estado
   const defaultStatusConfigs: Record<string, StatusConfig> = {
@@ -57,10 +57,10 @@ const StatusBadge: React.FC<IStatusBadgeProps> = ({
 
   // Usar la configuración personalizada o la configuración del proyecto por defecto
   const config = statusConfig || defaultStatusConfigs.project;
-  
+
   // Obtener la configuración para este estado específico o usar la configuración predeterminada
   const { bg, text, label } = config[status] || config.default;
-  
+
   // Determinar la etiqueta a mostrar (la etiqueta personalizada o el estado en sí)
   const displayLabel = label || status;
 
@@ -72,7 +72,7 @@ const StatusBadge: React.FC<IStatusBadgeProps> = ({
   };
 
   return (
-    <span 
+    <span
       className={`inline-flex items-center justify-center rounded-full font-medium ${bg} ${text} ${sizeClasses[size]} ${className}`}
       {...props}
     >

@@ -28,7 +28,7 @@ interface INavItem {
 const Sidebar: React.FC<ISidebarProps> = ({ isOpen, onClose, className = '' }) => {
   // Mock del rol de usuario (esto vendría del contexto de autenticación)
   const userRole: UserRole = 'admin'; // Puede ser 'admin', 'manager', o 'regular'
-  
+
   // Determinar si mostrar opciones de admin/manager
   const hasAdminAccess = userRole === "admin" || userRole === "manager";
 
@@ -59,14 +59,14 @@ const Sidebar: React.FC<ISidebarProps> = ({ isOpen, onClose, className = '' }) =
   ];
 
   // Filtrar los items de navegación según el rol del usuario
-  const filteredNavItems = navItems.filter(item => 
+  const filteredNavItems = navItems.filter(item =>
     !item.roles || item.roles.includes(userRole)
   );
 
   // Componente para el overlay que cierra el sidebar al hacer click (solo en móvil)
   const Overlay: React.FC = () => (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-10" 
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-10"
       onClick={onClose}
     />
   );
@@ -74,14 +74,14 @@ const Sidebar: React.FC<ISidebarProps> = ({ isOpen, onClose, className = '' }) =
   return (
     <>
       {isOpen && <Overlay />}
-      <aside 
+      <aside
         className={`fixed inset-y-0 left-0 z-20 w-64 transform bg-white shadow-lg transition-transform md:relative md:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } ${className}`}
       >
         <div className="p-4 bg-blue-50">
           <h2 className="font-bold text-blue-900 flex items-center">
-            <BarChart size={20} className="mr-2" /> 
+            <BarChart size={20} className="mr-2" />
             Dashboard
           </h2>
         </div>
@@ -102,7 +102,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ isOpen, onClose, className = '' }) =
                 </NavLink>
               </li>
             ))}
-            
+
             {/* Separador para secciones admin */}
             {hasAdminAccess && (
               <li className="my-2 border-t border-gray-200"></li>

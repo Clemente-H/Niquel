@@ -25,13 +25,13 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {/* Ruta raíz redirecta al dashboard */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        
+
         {/* Rutas de autenticación */}
         <Route path="/auth" element={<AuthLayout />}>
           <Route path="login" element={<Login />} />
           {/*<Route path="register" element={<Register />} /> */}
         </Route>
-        
+
         {/* Rutas protegidas del dashboard */}
         <Route path="/" element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
@@ -42,7 +42,7 @@ const AppRoutes: React.FC = () => {
           <Route path="admin/users" element={<UserManagement />} />*/}
           <Route path="admin/settings" element={<div>Configuración del sistema</div>} />
         </Route>
-        
+
         {/* Ruta para páginas no encontradas */}
         <Route path="*" element={<div>Página no encontrada</div>} />
       </Routes>

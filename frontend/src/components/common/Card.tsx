@@ -17,20 +17,20 @@ interface ICardProps extends IBaseComponentProps, IWithChildrenProps {
  * Componente Card reutilizable
  * Proporciona un contenedor con sombra y bordes redondeados
  */
-const Card: React.FC<ICardProps> = ({ 
-  children, 
-  title, 
-  icon, 
-  actions, 
+const Card: React.FC<ICardProps> = ({
+  children,
+  title,
+  icon,
+  actions,
   noPadding = false,
   footer,
   isLoading = false,
-  className = '', 
-  ...props 
+  className = '',
+  ...props
 }) => {
   return (
-    <div 
-      className={`bg-white rounded-lg shadow overflow-hidden ${className}`} 
+    <div
+      className={`bg-white rounded-lg shadow overflow-hidden ${className}`}
       {...props}
     >
       {/* Cabecera condicional si hay título o acciones */}
@@ -45,7 +45,7 @@ const Card: React.FC<ICardProps> = ({
           {actions && <div className="flex space-x-2">{actions}</div>}
         </div>
       )}
-      
+
       {/* Contenido principal */}
       <div className={`${!noPadding ? 'p-6' : ''} ${isLoading ? 'opacity-60' : ''}`}>
         {isLoading ? (

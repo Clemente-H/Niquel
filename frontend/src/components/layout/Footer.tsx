@@ -13,7 +13,7 @@ interface IFooterProps extends IBaseComponentProps {
  */
 const Footer: React.FC<IFooterProps> = ({ className = '' }) => {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className={`p-4 bg-gray-100 text-center text-gray-600 text-sm mt-auto ${className}`}>
       © {currentYear} Sistema de Gestión de Proyectos - v1.0

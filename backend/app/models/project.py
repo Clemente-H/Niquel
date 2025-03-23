@@ -31,8 +31,11 @@ class Project(ProjectInDBBase):
     """
     Project model as returned by the API
     """
+
     pass
 
 
 class ProjectWithUsers(Project):
-    assigned_users: List[Any] = []  # List[User] is not used to avoid circular dependency
+    assigned_users: List[
+        Any
+    ] = []  # List[User] is not used to avoid circular dependency

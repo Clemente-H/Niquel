@@ -7,16 +7,17 @@ from app.core.config import settings
 # Creates SQLAlchemy engine
 engine = create_engine(
     settings.DATABASE_URL,
-    pool_pre_ping=True,  # Checks conection before using it 
+    pool_pre_ping=True,  # Checks conection before using it
 )
 
-#Creates local session
+# Creates local session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Base for declarative models
 Base = declarative_base()
 
-# Get db session function 
+
+# Get db session function
 def get_db():
     db = SessionLocal()
     try:

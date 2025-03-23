@@ -9,17 +9,17 @@ import { ILoginCredentials } from '../../types';
  */
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  
+
   // Estado para el formulario
   const [credentials, setCredentials] = useState<ILoginCredentials>({
     email: '',
     password: ''
   });
-  
+
   // Estado para errores y carga
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  
+
   // Manejar cambios en los campos del formulario
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
@@ -28,17 +28,17 @@ const Login: React.FC = () => {
       [name]: value
     }));
   };
-  
+
   // Manejar envío del formulario
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-    
+
     try {
       // Simular llamada a la API (esto sería reemplazado por una llamada real)
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Validación simple (en producción, esto se haría en el backend)
       if (credentials.email === 'admin@example.com' && credentials.password === 'password') {
         // Login exitoso, redireccionar al dashboard
@@ -54,18 +54,18 @@ const Login: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div>
       <h2 className="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
-      
+
       {/* Mensaje de error */}
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
           {error}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-medium mb-2">
@@ -86,7 +86,7 @@ const Login: React.FC = () => {
             />
           </div>
         </div>
-        
+
         <div className="mb-6">
           <label className="block text-gray-700 text-sm font-medium mb-2">
             Contraseña
@@ -111,7 +111,7 @@ const Login: React.FC = () => {
             </a>
           </div>
         </div>
-        
+
         <Button
           type="submit"
           variant="primary"
@@ -122,7 +122,7 @@ const Login: React.FC = () => {
           Iniciar Sesión
         </Button>
       </form>
-      
+
       <div className="mt-4 text-center text-sm text-gray-600">
         ¿No tiene una cuenta?{' '}
         <Link to="/auth/register" className="text-blue-600 hover:text-blue-800">

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional
 
 
 class UserBase(BaseModel):
@@ -28,6 +28,7 @@ class User(UserInDBBase):
     """
     User model as returned by the API, does not include the hashed password
     """
+
     pass
 
 
@@ -35,4 +36,5 @@ class UserInDB(UserInDBBase):
     """
     User model as stored in the database, includes the hashed password
     """
+
     hashed_password: str

@@ -26,14 +26,14 @@ const AuthLayout: React.FC<IAuthLayoutProps> = () => {
               Accede a tu cuenta para gestionar tus proyectos
             </p>
           </div>
-          
+
           {/* Contenido de autenticación (Login/Register) */}
           <div className="bg-white p-8 shadow-md rounded-lg">
             <Outlet />
           </div>
         </div>
       </div>
-      
+
       {/* Footer simple */}
       <footer className="p-4 text-center text-gray-600 text-sm">
         © {new Date().getFullYear()} Sistema de Gestión de Proyectos - v1.0

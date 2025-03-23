@@ -12,9 +12,9 @@ app = FastAPI(
 
 # Config CORS
 origins = [
-    "http://localhost:3000",  # Frontend local development  
+    "http://localhost:3000",  # Frontend local development
     "http://localhost:5173",  # Vite dev server
-    "http://frontend:3000",   # Frontend Docker
+    "http://frontend:3000",  # Frontend Docker
 ]
 
 app.add_middleware(
@@ -27,6 +27,7 @@ app.add_middleware(
 
 # Include from API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
 
 @app.get("/")
 async def root():

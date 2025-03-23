@@ -20,13 +20,13 @@ interface IDashboardProps {
 const Dashboard: React.FC<IDashboardProps> = () => {
   // Estado para búsqueda
   const [searchTerm, setSearchTerm] = useState<string>('');
-  
+
   // Mock del rol de usuario (esto vendría del contexto de autenticación)
   const userRole: UserRole = 'admin'; // Puede ser 'admin', 'manager', o 'regular'
-  
+
   // Determinar si mostrar opciones de admin/manager
   const hasAdminAccess = userRole === "admin" || userRole === "manager";
-  
+
   // Datos dummy para los proyectos (esto vendría de una llamada a la API)
   const projectsData: IProject[] = [
     { id: 1, name: "Canal Los Andes", description: "", location: "Sector Norte", owner: "Carlos Méndez", status: "En progreso", startDate: "2024-10-15", lastUpdate: "2025-03-18", type: "Hidrología" },
@@ -35,9 +35,9 @@ const Dashboard: React.FC<IDashboardProps> = () => {
     { id: 4, name: "Análisis Pluvial Sierra Bella", description: "", location: "Cordillera", owner: "Ana Martínez", status: "En progreso", startDate: "2024-10-05", lastUpdate: "2025-03-05", type: "Análisis" },
     { id: 5, name: "Restauración Canal San Carlos", description: "", location: "Región Metropolitana", owner: "Pedro López", status: "En revisión", startDate: "2024-08-15", lastUpdate: "2025-02-28", type: "Restauración" },
   ];
-  
+
   // Filtrar proyectos según término de búsqueda
-  const filteredProjects = projectsData.filter(project => 
+  const filteredProjects = projectsData.filter(project =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     project.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
     project.owner.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -59,12 +59,12 @@ const Dashboard: React.FC<IDashboardProps> = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <Search 
-                size={18} 
-                className="absolute left-3 top-2.5 text-gray-400" 
+              <Search
+                size={18}
+                className="absolute left-3 top-2.5 text-gray-400"
               />
             </div>
-            
+
             {hasAdminAccess && (
               <Button
                 variant="primary"
@@ -94,7 +94,7 @@ const Dashboard: React.FC<IDashboardProps> = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredProjects.map((project) => (
-                <tr 
+                <tr
                   key={project.id}
                   className="hover:bg-gray-50 cursor-pointer"
                 >
@@ -128,7 +128,7 @@ const Dashboard: React.FC<IDashboardProps> = () => {
             </tbody>
           </table>
         </div>
-        
+
         {/* Mensaje si no hay proyectos */}
         {filteredProjects.length === 0 && (
           <div className="text-center py-4 text-gray-500">

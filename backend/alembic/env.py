@@ -1,16 +1,12 @@
 import os
 import sys
 from logging.config import fileConfig
-
 from alembic import context
-from sqlalchemy import engine_from_config, pool
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Import models and project config
-from app.core.config import settings
-from app.db.models import Base
-from app.db.session import engine
+from app.core.config import settings  # noqa: E402
+from app.db.models import Base  # noqa: E402
+from app.db.session import engine  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -34,6 +30,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -71,7 +68,7 @@ def run_migrations_online():
     with connectable.connect() as connection:
         context.configure(
             connection=connection, target_metadata=target_metadata
-        )
+        )  # noqa: E501
 
         with context.begin_transaction():
             context.run_migrations()
