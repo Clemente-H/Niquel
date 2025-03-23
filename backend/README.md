@@ -14,7 +14,7 @@ Python FastAPI backend for the Niquel Project Management System with role-based 
 
 ## Tech Stack
 
-- **Python 3.10+**: Modern Python features
+- **Python 3.11+**: Modern Python features
 - **FastAPI**: High-performance API framework
 - **PostgreSQL**: Relational database
 - **SQLAlchemy**: ORM for database interactions
@@ -118,8 +118,8 @@ backend/
 - name: String
 - description: Text
 - location: String
-- type: Enum (hydrological, conservation, monitoring, analysis, restoration)
-- status: Enum (planning, in_progress, in_review, completed)
+- type: Enum (Hidrología, Conservación, Monitoreo, Análisis, Restauración)
+- status: Enum (Planificación, En progreso, En revisión, Completado)
 - owner_id: UUID (foreign key to User)
 - start_date: Date
 - created_at: DateTime
@@ -205,7 +205,7 @@ backend/
 ## Setup and Installation
 
 ### Prerequisites
-- Python 3.10+
+- Python 3.11+
 - PostgreSQL
 - pip
 - virtualenv (recommended)
@@ -280,49 +280,67 @@ Once the server is running, visit:
 
 ## Development Roadmap
 
-1. **Phase 1: Initial Setup**
+1. **Phase 1: Initial Setup** ✅
    - Project structure setup
    - Basic FastAPI configuration
    - Database connection setup
    - Alembic configuration
 
-2. **Phase 2: Authentication System**
+2. **Phase 2: Authentication System** ✅
    - User model definition
    - JWT implementation
-   - Login/register endpoints
+   - Login/register endpoints (in progress)
    - Password hashing
 
-3. **Phase 3: Core Data Models**
+3. **Phase 3: Core Data Models** ✅
    - Project model
    - Period model
    - File model
    - User assignment model
 
-4. **Phase 4: CRUD API Endpoints**
+4. **Phase 4: CRUD API Endpoints** 🔄
    - User management endpoints
    - Project management endpoints
    - Period management endpoints
    - File management endpoints
 
-5. **Phase 5: Business Logic Layer**
+5. **Phase 5: Business Logic Layer** 🔄
    - Service implementation
    - Role-based access control
    - Business rules enforcement
 
-6. **Phase 6: Database Seeder**
+6. **Phase 6: Database Seeder** ✅
    - Create realistic test data
    - Generate sample projects and users
    - Create test periods and files
 
-7. **Phase 7: Testing**
+7. **Phase 7: Testing** 🔄
    - Unit tests for models and services
    - Integration tests for API endpoints
    - Performance tests
 
-8. **Phase 8: Documentation and Optimization**
+8. **Phase 8: Documentation and Optimization** 🔄
    - API documentation completion
    - Code optimization
    - Performance improvements
+
+## Progress Updates
+
+### 2025-03-23: Database Models and Authentication System
+- Implemented database models (User, Project, Period, File, UserAssignment)
+- Created SQLAlchemy base class and relationships
+- Implemented JWT authentication system (security.py)
+- Created database session management
+- Implemented exception handling classes
+- Completed the seed_data.py script for generating test data
+- Created API dependency system for authentication and permissions
+
+## Next Steps
+- Implement Pydantic schemas for the models
+- Create the authentication endpoints (login/register)
+- Implement the CRUD API endpoints for all resources
+- Complete the service layer for business logic
+- Create migration scripts with Alembic
 
 ## Contribution Guidelines
 
