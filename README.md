@@ -1,4 +1,4 @@
-# Project Management System - Frontend
+# Niquel - Project Management System
 
 A TypeScript React frontend for a role-based project management system.
 
@@ -22,8 +22,10 @@ A TypeScript React frontend for a role-based project management system.
 │   │   └── layout/        # Layout components (Sidebar, Header, Footer)
 │   ├── hooks/             # Custom React hooks
 │   ├── pages/             # Page components by route
-│   │   ├── auth/          # Authentication pages (Login)
-│   │   └── dashboard/     # Dashboard pages
+│   │   ├── auth/          # Authentication pages (Login, Register)
+│   │   ├── dashboard/     # Dashboard pages
+│   │   ├── projects/      # Project management pages
+│   │   └── admin/         # Admin pages (User Management)
 │   ├── services/          # API services
 │   ├── store/             # State management
 │   ├── types/             # TypeScript type definitions
@@ -46,8 +48,6 @@ A TypeScript React frontend for a role-based project management system.
 - [x] Phase 1: Frontend architecture definition
 - [x] Phase 2: Environment setup with TypeScript and Tailwind
 - [x] Phase 3: Application type definitions
-
-### Current Phase
 - [x] Phase 4: Layout components implementation
   - [x] Main dashboard layout (DashboardLayout)
   - [x] Authentication layout (AuthLayout)
@@ -61,17 +61,32 @@ A TypeScript React frontend for a role-based project management system.
   - [x] Role-based route protection
 - [x] Phase 7: Initial pages development
   - [x] Login page
+  - [x] Register page
   - [x] Dashboard with project listing
+- [x] Phase 8: Project management pages
+  - [x] Project list with filtering
+  - [x] Project details page
+  - [x] Project form for creation/editing
+- [x] Phase 9: User management page
+  - [x] User listing with filtering
+  - [x] User creation/editing form
+  - [x] Role-based access control
+
+### Current Phase
+- [ ] Phase 10: State management implementation
+  - [ ] API service integration
+  - [ ] Auth context for user sessions
+  - [ ] Form validation and error handling
 
 ### Next Phases
-- [ ] Phase 8: State management implementation
-- [ ] Phase 9: Remaining pages development
-  - [ ] Project details
-  - [ ] Project form
-  - [ ] Period management
-  - [ ] User management
-- [ ] Phase 10: Backend integration
-- [ ] Phase 11: Testing and optimization
+- [ ] Phase 11: Additional functionality
+  - [ ] Period management components
+  - [ ] File upload integration
+  - [ ] Visualization components
+- [ ] Phase 12: Backend integration and testing
+  - [ ] Connect to API endpoints
+  - [ ] Error handling and loading states
+  - [ ] End-to-end testing
 
 ## Technologies Used
 
@@ -80,7 +95,7 @@ A TypeScript React frontend for a role-based project management system.
 - **TailwindCSS** for styling
 - **React Router** for routing
 - **Lucide React** for icons
-- **Axios** for API calls (pending implementation)
+- **Axios** for API calls
 
 ## Setup and Installation
 
@@ -119,17 +134,16 @@ For testing the login:
 
 ## Implemented Features
 
-1. **Routing System**: Configured with React Router, including lazy loading
-2. **Simulated Authentication**: Functional login form (with mocked data)
-3. **Responsive Layout**: Adaptable design with collapsible sidebar
-4. **Reusable Components**: Button, Card, and StatusBadge implemented
-5. **Strict Typing**: All interfaces and types defined with TypeScript
-6. **Dashboard**: Project visualization with filtering
+1. **Authentication System**: Login and registration with role-based access
+2. **Dashboard Interface**: Overview of all projects with filtering options
+3. **Project Management**: Create, view, and edit projects
+4. **User Management**: Admin interface for managing system users
+5. **Role-Based Access Control**: Different permissions by user role
+6. **Responsive Design**: Mobile-friendly interface using Tailwind CSS
 
 ## Development Notes
 
-- The frontend uses mocked data for development, pending integration with a real API
-- The authentication system is currently simulated
-- Route protection is configured but allows access by default for development
-- The design follows the style guide defined with corporate colors in Tailwind
-- All code comments and function names are in English for better maintainability
+- The frontend currently uses mocked data for development, pending integration with a real API
+- All forms include validation and loading states to improve UX
+- The project is structured to easily integrate with a backend API in future phases
+- Route protection is implemented based on user roles
