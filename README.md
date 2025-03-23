@@ -1,143 +1,135 @@
-# Niquel - Project Management System
+# Project Management System - Frontend
 
-A web-based project management system with role-based access control.
+A TypeScript React frontend for a role-based project management system.
 
 ## Key Features
 
-- **Authentication System**: Basic email/password login (with future Google integration)
-- **User Management**: 3 different roles (Admin, Manager, Regular)
+- **User Authentication**: Email/password login system
+- **User Management**: Support for 3 different roles (Admin, Manager, Regular)
 - **Project Management**: Track project status and historical changes
-- **User Assignment**: Control project access based on assignments
+- **User Assignment**: Project access control based on user assignments
 - **File Management**: Associate files with projects
-
-## User Roles
-
-- **Admin**: Full system control, access to all projects and users
-- **Manager**: Regular user management and project assignment capabilities
-- **Regular**: Limited access to assigned projects only
-
-## Technology Stack
-
-### Backend
-- Python with FastAPI
-- PostgreSQL database
-- JWT authentication
-
-### Frontend
-- React + Vite + Typescript
-- Material-UI components
-- Context API for state management
-
-### DevOps
-- Docker and Docker Compose for containerization
-- Volumes for data persistence
+- **Period Management**: Control different time periods within each project
 
 ## Project Structure
 
 ```
-project-manager/
-├── backend/                  # FastAPI application
-│   ├── app/
-│   │   ├── api/              # API endpoints
-│   │   ├── core/             # Core configuration
-│   │   ├── db/               # Database models and connection
-│   │   ├── models/           # Pydantic models
-│   │   ├── services/         # Business logic
-│   │   └── utils/            # Utilities
-│   ├── alembic/              # Database migrations
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   └── venv/                 # Virtual environment (not in Git)
-├── frontend/                 # React with Vite application
-│   ├── public/
-│   ├── src/
-│   │   ├── components/       # Reusable components
-│   │   ├── contexts/         # Context API
-│   │   ├── pages/            # Main pages
-│   │   ├── services/         # API services
-│   │   └── utils/            # Utilities
-│   ├── Dockerfile
-│   ├── package.json
-│   └── vite.config.js
-├── docker-compose.yml
-└── README.md
+├── public/                # Static public assets
+├── src/                   # Source code
+│   ├── assets/            # Static assets (images, icons, etc.)
+│   ├── components/        # Reusable components
+│   │   ├── common/        # Generic components (Button, Card, etc.)
+│   │   └── layout/        # Layout components (Sidebar, Header, Footer)
+│   ├── hooks/             # Custom React hooks
+│   ├── pages/             # Page components by route
+│   │   ├── auth/          # Authentication pages (Login)
+│   │   └── dashboard/     # Dashboard pages
+│   ├── services/          # API services
+│   ├── store/             # State management
+│   ├── types/             # TypeScript type definitions
+│   ├── utils/             # Utility functions
+│   ├── App.tsx            # Root component
+│   ├── index.tsx          # Entry point
+│   ├── routes.tsx         # Route configuration
+│   └── index.css          # Global styles
+├── tailwind.config.js     # Tailwind CSS configuration
+├── vite.config.ts         # Vite configuration
+├── tsconfig.json          # TypeScript configuration
+├── postcss.config.js      # PostCSS configuration
+└── package.json           # Dependencies and scripts
 ```
 
 ## Current Status
 
-### Current Phase
+### Completed Phases
 - [x] Phase 0: Planning and initial structure
-- [x] Phase 1: Project initialization
-  - [x] Create directory structure
-  - [x] Initialize backend environment
-  - [x] Initialize frontend with Vite and React
-  - [x] Install basic dependencies
-  - [x] Complete environment setup
-- [ ] Phase 2: Authentication and User Management
-- [ ] Phase 3: Project Management
-- [ ] Phase 4: Assignment System
-- [ ] Phase 5: File Management
-- [ ] Phase 6: Enhancements and Additional Features
+- [x] Phase 1: Frontend architecture definition
+- [x] Phase 2: Environment setup with TypeScript and Tailwind
+- [x] Phase 3: Application type definitions
 
-## Setup Instructions
+### Current Phase
+- [x] Phase 4: Layout components implementation
+  - [x] Main dashboard layout (DashboardLayout)
+  - [x] Authentication layout (AuthLayout)
+  - [x] Header, sidebar, and footer components
+- [x] Phase 5: Common components implementation
+  - [x] Button component with variants
+  - [x] Card component for content
+  - [x] Status indicator with badges
+- [x] Phase 6: Basic routing implementation
+  - [x] React Router configuration
+  - [x] Role-based route protection
+- [x] Phase 7: Initial pages development
+  - [x] Login page
+  - [x] Dashboard with project listing
+
+### Next Phases
+- [ ] Phase 8: State management implementation
+- [ ] Phase 9: Remaining pages development
+  - [ ] Project details
+  - [ ] Project form
+  - [ ] Period management
+  - [ ] User management
+- [ ] Phase 10: Backend integration
+- [ ] Phase 11: Testing and optimization
+
+## Technologies Used
+
+- **React 18** with TypeScript
+- **Vite** as bundler
+- **TailwindCSS** for styling
+- **React Router** for routing
+- **Lucide React** for icons
+- **Axios** for API calls (pending implementation)
+
+## Setup and Installation
 
 ### Prerequisites
-- Python 3.10+
 - Node.js 16+
-- Docker and Docker Compose (optional)
-- Git
+- npm or yarn
 
-### Manual Installation (Development)
-
-#### Backend
+### Installation
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+# Clone the repository
+git clone [REPOSITORY_URL]
+cd project-manager/frontend
 
-#### Frontend
-```bash
-cd frontend
+# Install dependencies
 npm install
+
+# Start development server
 npm run dev
 ```
 
-### Docker Installation
-```bash
-docker-compose up -d
-```
-- Frontend will be available at: http://localhost:3000
-- API will be available at: http://localhost:8000
+The application will be available at: http://localhost:5173
 
-## Database Migrations
+### Test Data
+For testing the login:
+- Email: admin@example.com
+- Password: password
 
-To initialize the database and run migrations:
+## Code Conventions
 
-```bash
-cd backend
-alembic revision --autogenerate -m "Initial database setup"
-alembic upgrade head
-```
+- Components in PascalCase
+- TypeScript interfaces prefixed with 'I' (e.g., IUser)
+- Custom hooks with "use" prefix
+- Service functions in camelCase
+- Component and page files with .tsx extension
+- Utility files with .ts extension
 
-## TypeScript Migration
-The project has been migrated from JavaScript (JSX) to TypeScript (TSX) for improved type safety and developer experience. This change provides:
+## Implemented Features
 
-- Static type checking
-- Better IDE support with autocompletion
-- Improved code documentation through interfaces and types
-- Early detection of common errors
-
-## Next Steps
-- Implement authentication system in Phase 2
-- Create user management interfaces
-- Develop project management features
+1. **Routing System**: Configured with React Router, including lazy loading
+2. **Simulated Authentication**: Functional login form (with mocked data)
+3. **Responsive Layout**: Adaptable design with collapsible sidebar
+4. **Reusable Components**: Button, Card, and StatusBadge implemented
+5. **Strict Typing**: All interfaces and types defined with TypeScript
+6. **Dashboard**: Project visualization with filtering
 
 ## Development Notes
-- We chose Vite instead of Create React App for better development performance
-- File structure follows feature-based organization for easier maintenance
-- The project uses Material-UI for consistent UI components
-- Context API is used for state management instead of Redux for simplicity
-- TypeScript is used throughout the frontend for type safety
+
+- The frontend uses mocked data for development, pending integration with a real API
+- The authentication system is currently simulated
+- Route protection is configured but allows access by default for development
+- The design follows the style guide defined with corporate colors in Tailwind
+- All code comments and function names are in English for better maintainability
