@@ -14,6 +14,8 @@ COPY . .
 # Configurar variables de entorno
 ENV PYTHONPATH=/app
 ENV PORT=8000
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Exponer puerto
 EXPOSE $PORT

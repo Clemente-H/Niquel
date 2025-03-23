@@ -1,16 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.api import api_router
+from app.core.config import settings
+
 app = FastAPI(
     title="Project Manager API",
-    description="API para el sistema de gestión de proyectos",
+    description="API for Niquel's project management",
     version="0.1.0",
 )
 
-# Configurar CORS
+# Config CORS
 origins = [
-    "http://localhost:3000",  # Frontend en desarrollo
-    "http://frontend:3000",   # Frontend en Docker
+    "http://localhost:3000",  # Frontend local development  
+    "http://localhost:5173",  # Vite dev server
+    "http://frontend:3000",   # Frontend Docker
 ]
 
 app.add_middleware(
@@ -21,16 +25,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include from API router
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
 @app.get("/")
 async def root():
-    return {"message": "Bienvenido a la API de Project Manager"}
-
-@app.get("/api/status")
-async def check_status():
-    return {
-        "status": "online",
-        "version": "0.1.0"
-    }
-
-# Aquí importaremos las rutas cuando las creemos
-# from app.api.routes import users, projects, auth
+    return {"message": "Welcome to the Niquel's API"}

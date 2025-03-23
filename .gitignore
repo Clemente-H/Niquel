@@ -1,2 +1,6 @@
 .env
 extra/*
+*/.ds_store
+*/.DS_Store
+*/.idea/*
+*/.vscode/*
