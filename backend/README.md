@@ -203,6 +203,42 @@ backend/
 - PUT /api/assignments/{id}: Update user assignment
 - DELETE /api/assignments/{id}: Remove user from project
 
+## Service Layer
+
+The service layer contains the business logic for the application. These services are responsible for:
+
+- Enforcing business rules and validation
+- Handling data access through the repository pattern
+- Managing entity relationships
+- Implementing complex operations
+
+### Key Services
+
+- **UserService**: Manages user operations and authentication
+- **ProjectService**: Handles project CRUD and access control
+- **PeriodService**: Manages period operations for projects
+- **FileService**: Handles file uploads, downloads, and management
+- **AssignmentService**: Controls user assignments to projects
+
+## Access Control System
+
+Niquel implements a comprehensive role-based access control system:
+
+1. **Global Roles**:
+   - **Admin**: Has full access to all resources
+   - **Manager**: Can access and manage all projects
+   - **Regular**: Can only access assigned projects
+
+2. **Project-Level Roles**:
+   - **Admin**: Full control over a specific project
+   - **Editor**: Can edit but not delete project resources
+   - **Viewer**: Read-only access to project resources
+
+3. **Access Control Logic**:
+   - Project owners automatically have admin privileges
+   - Users can be assigned different roles for different projects
+   - Resource access is validated at both API and service layers
+
 ## Setup and Installation
 
 ### Prerequisites
@@ -271,6 +307,9 @@ pytest
 
 # Run specific tests
 pytest tests/test_api/test_users.py
+
+# Run tests with coverage report
+pytest --cov=app
 ```
 
 ## API Documentation
@@ -315,7 +354,7 @@ Once the server is running, visit:
    - File management endpoints (files.py)
    - Assignment endpoints (assignments.py)
 
-6. **Phase 6: Business Logic Layer** 🔄
+6. **Phase 6: Business Logic Layer** ✅
    - User service
    - Project service
    - Period service
@@ -360,12 +399,21 @@ Once the server is running, visit:
 - Implemented user assignment endpoints for project permissions
 - Added proper error handling and validation
 
+### 2025-03-26: Service Layer and Utils Implementation
+- Created comprehensive service layer for business logic
+- Implemented user service for authentication and user management
+- Added project service with access control helpers
+- Created period and file services for data operations
+- Implemented assignment service for user-project relationships
+- Added file utility functions for uploads and file handling
+- Created date utility functions for data formatting and manipulation
+
 ## Next Steps
-- Implement service layer for complex business logic
-- Create automated tests for API endpoints
-- Optimize database queries for performance
-- Finalize API documentation
-- Frontend integration testing
+- Implement automated tests for API endpoints and services
+- Set up CI/CD pipeline for automated testing and deployment
+- Optimize database queries with proper indexes
+- Add comprehensive logging system
+- Complete frontend integration
 
 ## Contribution Guidelines
 
@@ -373,3 +421,5 @@ Once the server is running, visit:
 - Follow PEP 8 guidelines
 - Write tests for all new features
 - Keep the API documentation up to date
+- Use descriptive commit messages
+- Create feature branches for new functionality
