@@ -1,6 +1,6 @@
 # Niquel - Backend API
 
-Python FastAPI backend for the Niquel Project Management System with role-based access control.
+Python FastAPI backend para el Niquel Project Management System con role-based access control.
 
 ## Features
 
@@ -58,12 +58,13 @@ backend/
 │   │       └── assignment.py
 │   ├── models/             # Pydantic models (schemas)
 │   │   ├── __init__.py
-│   │   ├── user.py
-│   │   ├── project.py
-│   │   ├── period.py
-│   │   ├── file.py
-│   │   ├── assignment.py
-│   │   └── token.py
+│   │   ├── base.py         # Base schemas
+│   │   ├── token.py        # Auth token schemas
+│   │   ├── user.py         # User schemas
+│   │   ├── project.py      # Project schemas
+│   │   ├── period.py       # Period schemas
+│   │   ├── file.py         # File schemas
+│   │   └── assignment.py   # Assignment schemas
 │   ├── services/           # Business logic layer
 │   │   ├── __init__.py
 │   │   ├── user_service.py
@@ -298,21 +299,29 @@ Once the server is running, visit:
    - File model
    - User assignment model
 
-4. **Phase 4: CRUD API Endpoints** 🔄
-   - User management endpoints
-   - Project management endpoints
-   - Period management endpoints
-   - File management endpoints
+4. **Phase 4: Pydantic Schemas** ✅
+   - Base schemas
+   - User schemas
+   - Project schemas
+   - Period schemas
+   - File schemas
+   - Assignment schemas
 
-5. **Phase 5: Business Logic Layer** 🔄
-   - Service implementation
+5. **Phase 5: CRUD API Endpoints** 🔄
+   - Authentication endpoints (auth.py)
+   - User management endpoints (users.py)
+   - Project management endpoints (projects.py)
+   - Period management endpoints (periods.py)
+   - File management endpoints (files.py)
+   - Assignment endpoints (assignments.py)
+
+6. **Phase 6: Business Logic Layer** 🔄
+   - User service
+   - Project service
+   - Period service
+   - File service
+   - Assignment service
    - Role-based access control
-   - Business rules enforcement
-
-6. **Phase 6: Database Seeder** ✅
-   - Create realistic test data
-   - Generate sample projects and users
-   - Create test periods and files
 
 7. **Phase 7: Testing** 🔄
    - Unit tests for models and services
@@ -335,12 +344,19 @@ Once the server is running, visit:
 - Completed the seed_data.py script for generating test data
 - Created API dependency system for authentication and permissions
 
+### 2025-03-24: Pydantic Schemas Implementation
+- Created base schema classes
+- Implemented all Pydantic models for data validation and serialization
+- Added validation for roles, types, and other enumerated values
+- Created response models for pagination and detailed views
+- Aligned models with frontend TypeScript interfaces
+
 ## Next Steps
-- Implement Pydantic schemas for the models
-- Create the authentication endpoints (login/register)
-- Implement the CRUD API endpoints for all resources
-- Complete the service layer for business logic
-- Create migration scripts with Alembic
+- Implement authentication endpoints (login/register)
+- Complete API endpoint implementation for all resources
+- Implement service layer for business logic
+- Create automated tests
+- Finalize API documentation
 
 ## Contribution Guidelines
 
