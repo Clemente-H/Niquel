@@ -164,11 +164,8 @@ backend/
 ## API Endpoints
 
 ### Authentication
-- POST /api/auth/login: User login
-- POST /api/auth/logout: User logout
+- POST /api/auth/token: User login with OAuth2
 - POST /api/auth/register: User registration
-- POST /api/auth/password-recovery/{email}: Password recovery
-- POST /api/auth/reset-password: Reset password with token
 
 ### Users
 - GET /api/users/: Get all users (admin)
@@ -184,8 +181,6 @@ backend/
 - GET /api/projects/{id}: Get project details
 - PUT /api/projects/{id}: Update project
 - DELETE /api/projects/{id}: Delete project
-- GET /api/projects/{id}/assignments: Get project assignments
-- POST /api/projects/{id}/assignments: Add user to project
 
 ### Periods
 - GET /api/projects/{id}/periods/: Get all periods for a project
@@ -200,8 +195,13 @@ backend/
 - GET /api/files/{id}: Get file details
 - GET /api/files/{id}/download: Download file
 - DELETE /api/files/{id}: Delete file
-- GET /api/projects/{id}/files: Get project files
-- GET /api/periods/{id}/files: Get period files
+
+### Assignments
+- GET /api/projects/{id}/assignments: Get project assignments
+- POST /api/projects/{id}/assignments: Add user to project
+- POST /api/projects/{id}/batch-assign: Assign multiple users to project
+- PUT /api/assignments/{id}: Update user assignment
+- DELETE /api/assignments/{id}: Remove user from project
 
 ## Setup and Installation
 
@@ -290,7 +290,7 @@ Once the server is running, visit:
 2. **Phase 2: Authentication System** ✅
    - User model definition
    - JWT implementation
-   - Login/register endpoints (in progress)
+   - Login/register endpoints
    - Password hashing
 
 3. **Phase 3: Core Data Models** ✅
@@ -307,7 +307,7 @@ Once the server is running, visit:
    - File schemas
    - Assignment schemas
 
-5. **Phase 5: CRUD API Endpoints** 🔄
+5. **Phase 5: CRUD API Endpoints** ✅
    - Authentication endpoints (auth.py)
    - User management endpoints (users.py)
    - Project management endpoints (projects.py)
@@ -351,12 +351,21 @@ Once the server is running, visit:
 - Created response models for pagination and detailed views
 - Aligned models with frontend TypeScript interfaces
 
+### 2025-03-25: CRUD API Endpoints Implementation
+- Implemented all authentication endpoints (login/register)
+- Created user management endpoints with role-based access
+- Implemented project management with access control
+- Added period management endpoints
+- Created file upload and management system
+- Implemented user assignment endpoints for project permissions
+- Added proper error handling and validation
+
 ## Next Steps
-- Implement authentication endpoints (login/register)
-- Complete API endpoint implementation for all resources
-- Implement service layer for business logic
-- Create automated tests
+- Implement service layer for complex business logic
+- Create automated tests for API endpoints
+- Optimize database queries for performance
 - Finalize API documentation
+- Frontend integration testing
 
 ## Contribution Guidelines
 
