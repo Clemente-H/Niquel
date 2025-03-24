@@ -1,15 +1,7 @@
-.env
-extra/*
-*/.ds_store
-*/.DS_Store
-*/.idea/*
-*/.vscode/*
-*.DS_Store
-
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.class
 *.so
 .Python
 env/
@@ -27,7 +19,6 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-
 
 # Virtual Environment
 venv/

@@ -1,6 +1,6 @@
 # Niquel - Backend API
 
-Python FastAPI backend for the Niquel Project Management System with role-based access control.
+Python FastAPI backend para el Niquel Project Management System con role-based access control.
 
 ## Features
 
@@ -11,10 +11,11 @@ Python FastAPI backend for the Niquel Project Management System with role-based 
 - **File Management**: Store and serve project-related files
 - **Assignment System**: Control project access based on user assignments
 - **API Documentation**: Auto-generated Swagger documentation
+- **Comprehensive Test Suite**: Extensive test coverage for all components
 
 ## Tech Stack
 
-- **Python 3.10+**: Modern Python features
+- **Python 3.11+**: Modern Python features
 - **FastAPI**: High-performance API framework
 - **PostgreSQL**: Relational database
 - **SQLAlchemy**: ORM for database interactions
@@ -58,12 +59,13 @@ backend/
 │   │       └── assignment.py
 │   ├── models/             # Pydantic models (schemas)
 │   │   ├── __init__.py
-│   │   ├── user.py
-│   │   ├── project.py
-│   │   ├── period.py
-│   │   ├── file.py
-│   │   ├── assignment.py
-│   │   └── token.py
+│   │   ├── base.py         # Base schemas
+│   │   ├── token.py        # Auth token schemas
+│   │   ├── user.py         # User schemas
+│   │   ├── project.py      # Project schemas
+│   │   ├── period.py       # Period schemas
+│   │   ├── file.py         # File schemas
+│   │   └── assignment.py   # Assignment schemas
 │   ├── services/           # Business logic layer
 │   │   ├── __init__.py
 │   │   ├── user_service.py
@@ -87,7 +89,15 @@ backend/
 ├── tests/                  # Test directory
 │   ├── __init__.py
 │   ├── conftest.py         # Test configuration and fixtures
+│   ├── README.md           # Testing documentation
 │   ├── test_api/           # API tests
+│   │   ├── __init__.py
+│   │   ├── test_auth.py    # Authentication endpoint tests
+│   │   ├── test_users.py   # User endpoint tests
+│   │   ├── test_projects.py # Project endpoint tests
+│   │   ├── test_periods.py # Period endpoint tests
+│   │   ├── test_files.py   # File endpoint tests
+│   │   └── test_assignments.py # Assignment endpoint tests
 │   ├── test_services/      # Service layer tests
 │   └── test_models/        # Model tests
 ├── scripts/                # Utility scripts
@@ -97,6 +107,8 @@ backend/
 ├── .gitignore              # Git ignore file
 ├── pyproject.toml          # Project metadata and dependencies
 ├── Dockerfile              # Docker configuration
+├── Makefile                # Common development commands
+├── setup.py                # Package installation configuration
 ├── requirements.txt        # Python dependencies
 └── README.md               # This file
 ```
@@ -118,8 +130,8 @@ backend/
 - name: String
 - description: Text
 - location: String
-- type: Enum (hydrological, conservation, monitoring, analysis, restoration)
-- status: Enum (planning, in_progress, in_review, completed)
+- type: Enum (Hidrología, Conservación, Monitoreo, Análisis, Restauración)
+- status: Enum (Planificación, En progreso, En revisión, Completado)
 - owner_id: UUID (foreign key to User)
 - start_date: Date
 - created_at: DateTime
@@ -163,11 +175,8 @@ backend/
 ## API Endpoints
 
 ### Authentication
-- POST /api/auth/login: User login
-- POST /api/auth/logout: User logout
+- POST /api/auth/token: User login with OAuth2
 - POST /api/auth/register: User registration
-- POST /api/auth/password-recovery/{email}: Password recovery
-- POST /api/auth/reset-password: Reset password with token
 
 ### Users
 - GET /api/users/: Get all users (admin)
@@ -183,8 +192,6 @@ backend/
 - GET /api/projects/{id}: Get project details
 - PUT /api/projects/{id}: Update project
 - DELETE /api/projects/{id}: Delete project
-- GET /api/projects/{id}/assignments: Get project assignments
-- POST /api/projects/{id}/assignments: Add user to project
 
 ### Periods
 - GET /api/projects/{id}/periods/: Get all periods for a project
@@ -199,13 +206,54 @@ backend/
 - GET /api/files/{id}: Get file details
 - GET /api/files/{id}/download: Download file
 - DELETE /api/files/{id}: Delete file
-- GET /api/projects/{id}/files: Get project files
-- GET /api/periods/{id}/files: Get period files
+
+### Assignments
+- GET /api/projects/{id}/assignments: Get project assignments
+- POST /api/projects/{id}/assignments: Add user to project
+- POST /api/projects/{id}/batch-assign: Assign multiple users to project
+- PUT /api/assignments/{id}: Update user assignment
+- DELETE /api/assignments/{id}: Remove user from project
+
+## Service Layer
+
+The service layer contains the business logic for the application. These services are responsible for:
+
+- Enforcing business rules and validation
+- Handling data access through the repository pattern
+- Managing entity relationships
+- Implementing complex operations
+
+### Key Services
+
+- **UserService**: Manages user operations and authentication
+- **ProjectService**: Handles project CRUD and access control
+- **PeriodService**: Manages period operations for projects
+- **FileService**: Handles file uploads, downloads, and management
+- **AssignmentService**: Controls user assignments to projects
+
+## Access Control System
+
+Niquel implements a comprehensive role-based access control system:
+
+1. **Global Roles**:
+   - **Admin**: Has full access to all resources
+   - **Manager**: Can access and manage all projects
+   - **Regular**: Can only access assigned projects
+
+2. **Project-Level Roles**:
+   - **Admin**: Full control over a specific project
+   - **Editor**: Can edit but not delete project resources
+   - **Viewer**: Read-only access to project resources
+
+3. **Access Control Logic**:
+   - Project owners automatically have admin privileges
+   - Users can be assigned different roles for different projects
+   - Resource access is validated at both API and service layers
 
 ## Setup and Installation
 
 ### Prerequisites
-- Python 3.10+
+- Python 3.11+
 - PostgreSQL
 - pip
 - virtualenv (recommended)
@@ -223,6 +271,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
+# For development with tests
+pip install -e ".[dev]"
+
 # Setup environment variables
 cp .env.example .env
 # Edit .env with your database credentials and other settings
@@ -238,6 +289,7 @@ python scripts/seed_data.py
 
 # Start the development server
 uvicorn app.main:app --reload
+# Or simply use: make dev
 ```
 
 The API will be available at http://localhost:8000
@@ -264,12 +316,48 @@ alembic downgrade base  # Revert all migrations
 
 ## Testing
 
+The project includes a comprehensive test suite using pytest. The tests are organized to cover API endpoints, services, and models.
+
 ```bash
 # Run all tests
 pytest
+# Or simply use: make test
+
+# Run tests with coverage report
+pytest --cov=app
+# Or simply use: make test-cov
 
 # Run specific tests
-pytest tests/test_api/test_users.py
+pytest tests/test_api/test_auth.py
+```
+
+See the [tests/README.md](tests/README.md) file for detailed testing documentation.
+
+## Common Development Tasks
+
+The project includes a Makefile to simplify common development tasks:
+
+```bash
+# List all available commands
+make help
+
+# Run development server
+make dev
+
+# Run all tests
+make test
+
+# Run tests with coverage
+make test-cov
+
+# Format code
+make format
+
+# Run linters
+make lint
+
+# Clean up cache files
+make clean
 ```
 
 ## API Documentation
@@ -280,49 +368,112 @@ Once the server is running, visit:
 
 ## Development Roadmap
 
-1. **Phase 1: Initial Setup**
+1. **Phase 1: Initial Setup** ✅
    - Project structure setup
    - Basic FastAPI configuration
    - Database connection setup
    - Alembic configuration
 
-2. **Phase 2: Authentication System**
+2. **Phase 2: Authentication System** ✅
    - User model definition
    - JWT implementation
    - Login/register endpoints
    - Password hashing
 
-3. **Phase 3: Core Data Models**
+3. **Phase 3: Core Data Models** ✅
    - Project model
    - Period model
    - File model
    - User assignment model
 
-4. **Phase 4: CRUD API Endpoints**
-   - User management endpoints
-   - Project management endpoints
-   - Period management endpoints
-   - File management endpoints
+4. **Phase 4: Pydantic Schemas** ✅
+   - Base schemas
+   - User schemas
+   - Project schemas
+   - Period schemas
+   - File schemas
+   - Assignment schemas
 
-5. **Phase 5: Business Logic Layer**
-   - Service implementation
+5. **Phase 5: CRUD API Endpoints** ✅
+   - Authentication endpoints (auth.py)
+   - User management endpoints (users.py)
+   - Project management endpoints (projects.py)
+   - Period management endpoints (periods.py)
+   - File management endpoints (files.py)
+   - Assignment endpoints (assignments.py)
+
+6. **Phase 6: Business Logic Layer** ✅
+   - User service
+   - Project service
+   - Period service
+   - File service
+   - Assignment service
    - Role-based access control
-   - Business rules enforcement
 
-6. **Phase 6: Database Seeder**
-   - Create realistic test data
-   - Generate sample projects and users
-   - Create test periods and files
+7. **Phase 7: Testing** ✅
+   - Test configuration (conftest.py)
+   - Test fixtures for database and authentication
+   - Tests for API endpoints
+   - Test environment setup
 
-7. **Phase 7: Testing**
-   - Unit tests for models and services
-   - Integration tests for API endpoints
-   - Performance tests
-
-8. **Phase 8: Documentation and Optimization**
+8. **Phase 8: Documentation and Optimization** 🔄
    - API documentation completion
    - Code optimization
    - Performance improvements
+
+## Progress Updates
+
+### 2025-03-23: Database Models and Authentication System
+- Implemented database models (User, Project, Period, File, UserAssignment)
+- Created SQLAlchemy base class and relationships
+- Implemented JWT authentication system (security.py)
+- Created database session management
+- Implemented exception handling classes
+- Completed the seed_data.py script for generating test data
+- Created API dependency system for authentication and permissions
+
+### 2025-03-24: Pydantic Schemas Implementation
+- Created base schema classes
+- Implemented all Pydantic models for data validation and serialization
+- Added validation for roles, types, and other enumerated values
+- Created response models for pagination and detailed views
+- Aligned models with frontend TypeScript interfaces
+
+### 2025-03-25: CRUD API Endpoints Implementation
+- Implemented all authentication endpoints (login/register)
+- Created user management endpoints with role-based access
+- Implemented project management with access control
+- Added period management endpoints
+- Created file upload and management system
+- Implemented user assignment endpoints for project permissions
+- Added proper error handling and validation
+
+### 2025-03-26: Service Layer and Utils Implementation
+- Created comprehensive service layer for business logic
+- Implemented user service for authentication and user management
+- Added project service with access control helpers
+- Created period and file services for data operations
+- Implemented assignment service for user-project relationships
+- Added file utility functions for uploads and file handling
+- Created date utility functions for data formatting and manipulation
+
+### 2025-03-27: Testing Implementation
+- Set up test configuration with isolated test database
+- Created test fixtures for database, users, and authentication
+- Implemented comprehensive tests for all API endpoints
+- Added test coverage for authentication system
+- Created tests for role-based access control
+- Added tests for file uploads and management
+- Implemented Makefile for common development tasks
+- Set up package configuration for development and testing
+
+## Next Steps
+- Complete service-level tests
+- Implement model-specific tests
+- Set up CI/CD pipeline for automated testing and deployment
+- Optimize database queries with proper indexes
+- Add comprehensive logging system
+- Complete frontend integration
 
 ## Contribution Guidelines
 
@@ -330,3 +481,5 @@ Once the server is running, visit:
 - Follow PEP 8 guidelines
 - Write tests for all new features
 - Keep the API documentation up to date
+- Use descriptive commit messages
+- Create feature branches for new functionality
