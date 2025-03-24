@@ -11,6 +11,7 @@ Python FastAPI backend para el Niquel Project Management System con role-based a
 - **File Management**: Store and serve project-related files
 - **Assignment System**: Control project access based on user assignments
 - **API Documentation**: Auto-generated Swagger documentation
+- **Comprehensive Test Suite**: Extensive test coverage for all components
 
 ## Tech Stack
 
@@ -88,7 +89,15 @@ backend/
 ├── tests/                  # Test directory
 │   ├── __init__.py
 │   ├── conftest.py         # Test configuration and fixtures
+│   ├── README.md           # Testing documentation
 │   ├── test_api/           # API tests
+│   │   ├── __init__.py
+│   │   ├── test_auth.py    # Authentication endpoint tests
+│   │   ├── test_users.py   # User endpoint tests
+│   │   ├── test_projects.py # Project endpoint tests
+│   │   ├── test_periods.py # Period endpoint tests
+│   │   ├── test_files.py   # File endpoint tests
+│   │   └── test_assignments.py # Assignment endpoint tests
 │   ├── test_services/      # Service layer tests
 │   └── test_models/        # Model tests
 ├── scripts/                # Utility scripts
@@ -98,6 +107,8 @@ backend/
 ├── .gitignore              # Git ignore file
 ├── pyproject.toml          # Project metadata and dependencies
 ├── Dockerfile              # Docker configuration
+├── Makefile                # Common development commands
+├── setup.py                # Package installation configuration
 ├── requirements.txt        # Python dependencies
 └── README.md               # This file
 ```
@@ -260,6 +271,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
+# For development with tests
+pip install -e ".[dev]"
+
 # Setup environment variables
 cp .env.example .env
 # Edit .env with your database credentials and other settings
@@ -275,6 +289,7 @@ python scripts/seed_data.py
 
 # Start the development server
 uvicorn app.main:app --reload
+# Or simply use: make dev
 ```
 
 The API will be available at http://localhost:8000
@@ -301,15 +316,48 @@ alembic downgrade base  # Revert all migrations
 
 ## Testing
 
+The project includes a comprehensive test suite using pytest. The tests are organized to cover API endpoints, services, and models.
+
 ```bash
 # Run all tests
 pytest
-
-# Run specific tests
-pytest tests/test_api/test_users.py
+# Or simply use: make test
 
 # Run tests with coverage report
 pytest --cov=app
+# Or simply use: make test-cov
+
+# Run specific tests
+pytest tests/test_api/test_auth.py
+```
+
+See the [tests/README.md](tests/README.md) file for detailed testing documentation.
+
+## Common Development Tasks
+
+The project includes a Makefile to simplify common development tasks:
+
+```bash
+# List all available commands
+make help
+
+# Run development server
+make dev
+
+# Run all tests
+make test
+
+# Run tests with coverage
+make test-cov
+
+# Format code
+make format
+
+# Run linters
+make lint
+
+# Clean up cache files
+make clean
 ```
 
 ## API Documentation
@@ -362,10 +410,11 @@ Once the server is running, visit:
    - Assignment service
    - Role-based access control
 
-7. **Phase 7: Testing** 🔄
-   - Unit tests for models and services
-   - Integration tests for API endpoints
-   - Performance tests
+7. **Phase 7: Testing** ✅
+   - Test configuration (conftest.py)
+   - Test fixtures for database and authentication
+   - Tests for API endpoints
+   - Test environment setup
 
 8. **Phase 8: Documentation and Optimization** 🔄
    - API documentation completion
@@ -408,8 +457,19 @@ Once the server is running, visit:
 - Added file utility functions for uploads and file handling
 - Created date utility functions for data formatting and manipulation
 
+### 2025-03-27: Testing Implementation
+- Set up test configuration with isolated test database
+- Created test fixtures for database, users, and authentication
+- Implemented comprehensive tests for all API endpoints
+- Added test coverage for authentication system
+- Created tests for role-based access control
+- Added tests for file uploads and management
+- Implemented Makefile for common development tasks
+- Set up package configuration for development and testing
+
 ## Next Steps
-- Implement automated tests for API endpoints and services
+- Complete service-level tests
+- Implement model-specific tests
 - Set up CI/CD pipeline for automated testing and deployment
 - Optimize database queries with proper indexes
 - Add comprehensive logging system
