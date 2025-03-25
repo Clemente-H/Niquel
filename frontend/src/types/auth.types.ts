@@ -9,6 +9,7 @@ export interface IRegisterData {
   name: string;
   email: string;
   password: string;
+  role?: UserRole;
 }
 
 export interface IAuthResponse {
@@ -24,9 +25,9 @@ export interface IAuthContext {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (credentials: ILoginCredentials) => Promise<void>;
+  login: (credentials: ILoginCredentials) => Promise<IAuthResponse>;
   logout: () => void;
-  register: (data: IRegisterData) => Promise<void>;
+  register: (data: IRegisterData) => Promise<IAuthResponse>;
   hasRole: (requiredRoles: UserRole | UserRole[]) => boolean;
 }
 

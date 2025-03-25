@@ -87,6 +87,13 @@ class AuthService {
   }
 
   /**
+   * Obtener el token de autenticación
+   */
+  public getAuthToken(): string | null {
+    return apiClient.getAuthToken();
+  }
+
+  /**
    * Cerrar sesión
    */
   public logout(): void {
