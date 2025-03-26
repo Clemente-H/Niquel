@@ -3,9 +3,15 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 
+# Convert PostgresDsn to string for SQLAlchemy and ensure it has the right prefix
+database_url = str(settings.DATABASE_URL)
+# Ensure we use the async driver
+if database_url.startswith("postgresql://"):
+    database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
+
 # Create an async engine for working with asyncio
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    database_url,
     echo=settings.DEBUG,
     future=True,
 )

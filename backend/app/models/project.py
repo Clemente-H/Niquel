@@ -1,7 +1,7 @@
 from datetime import date
 from typing import List, Optional
 from uuid import UUID
-from pydantic import validator
+from pydantic import field_validator
 
 from app.models.base import BaseSchema, TimeStampModel, Paginated
 
@@ -26,7 +26,7 @@ class ProjectCreate(ProjectBase):
     type: str
     start_date: date
 
-    @validator("type")
+    @field_validator("type")
     def validate_type(cls, v):
         """Validate that type is one of the allowed values."""
         allowed_types = [
@@ -40,7 +40,7 @@ class ProjectCreate(ProjectBase):
             raise ValueError(f"Type must be one of {allowed_types}")
         return v
 
-    @validator("status", pre=True, always=True)
+    @field_validator("status", mode="before")
     def set_default_status(cls, v):
         """Set default status if not provided."""
         return v or "Planificación"
@@ -50,7 +50,7 @@ class ProjectCreate(ProjectBase):
 class ProjectUpdate(ProjectBase):
     """Schema for updating a project."""
 
-    @validator("status")
+    @field_validator("status")
     def validate_status(cls, v):
         """Validate that status is one of the allowed values."""
         if v is None:
@@ -60,7 +60,7 @@ class ProjectUpdate(ProjectBase):
             raise ValueError(f"Status must be one of {allowed_statuses}")
         return v
 
-    @validator("type")
+    @field_validator("type")
     def validate_type(cls, v):
         """Validate that type is one of the allowed values."""
         if v is None:

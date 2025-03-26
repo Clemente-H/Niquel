@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-from pydantic import validator
+from pydantic import field_validator
 
 from app.models.base import BaseSchema, TimeStampModel, Paginated
 
@@ -24,7 +24,7 @@ class FileUpload(FileBase):
     name: str
     category: str
 
-    @validator("category")
+    @field_validator("category")
     def validate_category(cls, v):
         """Validate that category is one of the allowed values."""
         allowed_categories = ["map", "image", "document", "analysis"]
@@ -77,7 +77,7 @@ class FileUpdate(FileBase):
     name: Optional[str] = None
     category: Optional[str] = None
 
-    @validator("category")
+    @field_validator("category")
     def validate_category(cls, v):
         """Validate that category is one of the allowed values."""
         if v is None:

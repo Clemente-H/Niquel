@@ -17,6 +17,7 @@ from app.models.project import (
     PaginatedProjects,
     ProjectStats,
 )
+from app.db.models.user import User
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 

@@ -1,6 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
-from pydantic import EmailStr, validator
+from pydantic import EmailStr, field_validator
 
 from app.models.base import BaseSchema, TimeStampModel, Paginated
 
@@ -24,7 +24,7 @@ class UserCreate(UserBase):
     password: str
     role: str = "regular"  # Default role is regular
 
-    @validator("role")
+    @field_validator("role")
     def validate_role(cls, v):
         """Validate that role is one of the allowed values."""
         allowed_roles = ["admin", "manager", "regular"]
@@ -46,8 +46,7 @@ class UserInDBBase(UserBase, TimeStampModel):
 
     id: UUID
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 
 # Additional properties to return via API

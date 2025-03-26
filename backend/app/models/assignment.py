@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-from pydantic import validator
+from pydantic import field_validator
 
 from app.models.base import BaseSchema, TimeStampModel, Paginated
 from app.models.user import User
@@ -24,7 +24,7 @@ class UserAssignmentCreate(UserAssignmentBase):
     project_id: UUID
     role: str = "viewer"  # Default role is viewer
 
-    @validator("role")
+    @field_validator("role")
     def validate_role(cls, v):
         """Validate that role is one of the allowed values."""
         allowed_roles = ["viewer", "editor", "admin"]
@@ -39,7 +39,7 @@ class UserAssignmentUpdate(UserAssignmentBase):
 
     role: Optional[str] = None
 
-    @validator("role")
+    @field_validator("role")
     def validate_role(cls, v):
         """Validate that role is one of the allowed values."""
         if v is None:
@@ -88,7 +88,7 @@ class BatchAssignment(BaseSchema):
     user_ids: List[UUID]
     role: str = "viewer"
 
-    @validator("role")
+    @field_validator("role")
     def validate_role(cls, v):
         """Validate that role is one of the allowed values."""
         allowed_roles = ["viewer", "editor", "admin"]

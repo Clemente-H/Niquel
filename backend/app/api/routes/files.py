@@ -4,7 +4,6 @@ from uuid import UUID
 
 from fastapi import (
     APIRouter,
-    Depends,
     File as FastAPIFile,
     Form,
     HTTPException,
@@ -104,12 +103,12 @@ async def get_files(
 
 @router.post("/files", response_model=FileSchema, status_code=status.HTTP_201_CREATED)
 async def upload_file(
+    db: DbSession,
+    current_user: CurrentUser,
     file: UploadFile = FastAPIFile(...),
     project_id: Optional[UUID] = Form(None),
     period_id: Optional[UUID] = Form(None),
     category: str = Form(...),
-    db: DbSession = Depends(),
-    current_user: CurrentUser = Depends(),
 ):
     """
     Upload a file.

@@ -467,6 +467,14 @@ Once the server is running, visit:
 - Implemented Makefile for common development tasks
 - Set up package configuration for development and testing
 
+## Migration Notes
+
+This project has been updated to use Pydantic v2. Main changes include:
+- Replacement of `BaseSettings` with the version from `pydantic_settings`
+- Update of validators from `validator` to `field_validator` with `mode="before"` instead of `pre=True`
+- Change from `Config` class to `model_config` dictionary
+- Use of `asyncpg` as the asynchronous driver for PostgreSQL
+
 ## Next Steps
 - Complete service-level tests
 - Implement model-specific tests
