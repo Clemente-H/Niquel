@@ -1,14 +1,21 @@
+// src/pages/auth/Login.tsx
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
 import Button from '../../components/common/Button';
 import { ILoginCredentials } from '../../types';
+import { useAuth } from '../../store/AuthContext';
 
 /**
  * Página de inicio de sesión
  */
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, error: authError } = useAuth();
+
+  // Obtener la ruta de redirección si existe
+  const from = (location.state as any)?.from?.pathname || '/dashboard';
 
   // Estado para el formulario
   const [credentials, setCredentials] = useState<ILoginCredentials>({
@@ -36,19 +43,13 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Simular llamada a la API (esto sería reemplazado por una llamada real)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Iniciar sesión usando el servicio de autenticación
+      const authResponse = await login(credentials);
 
-      // Validación simple (en producción, esto se haría en el backend)
-      if (credentials.email === 'admin@example.com' && credentials.password === 'password') {
-        // Login exitoso, redireccionar al dashboard
-        navigate('/dashboard');
-      } else {
-        // Mostrar error
-        setError('Credenciales inválidas');
-      }
+      // Redireccionar a la ruta original o al dashboard
+      navigate(from, { replace: true });
     } catch (err) {
-      setError('Error al iniciar sesión. Intente nuevamente.');
+      setError((err as Error).message || 'Error al iniciar sesión. Intente nuevamente.');
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
@@ -60,9 +61,9 @@ const Login: React.FC = () => {
       <h2 className="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
 
       {/* Mensaje de error */}
-      {error && (
+      {(error || authError) && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
-          {error}
+          {error || authError}
         </div>
       )}
 

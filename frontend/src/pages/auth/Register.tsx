@@ -1,20 +1,24 @@
+// src/pages/auth/Register.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User } from 'lucide-react';
 import Button from '../../components/common/Button';
 import { IRegisterData } from '../../types';
+import { useAuth } from '../../store/AuthContext';
 
 /**
  * Página de registro de usuario
  */
 const Register: React.FC = () => {
   const navigate = useNavigate();
+  const { register, error: authError } = useAuth();
 
   // Estado para el formulario
   const [formData, setFormData] = useState<IRegisterData>({
     name: '',
     email: '',
-    password: ''
+    password: '',
+    role: 'regular'  // Por defecto, los nuevos usuarios son regulares
   });
 
   // Estado para confirmación de contraseña
@@ -51,13 +55,13 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Simular llamada a la API (esto sería reemplazado por una llamada real)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Registrar usuario usando el servicio de autenticación
+      const authResponse = await register(formData);
 
-      // Registro exitoso, redireccionar al login
-      navigate('/auth/login');
+      // Redireccionar al dashboard
+      navigate('/dashboard');
     } catch (err) {
-      setError('Error al registrar el usuario. Intente nuevamente.');
+      setError((err as Error).message || 'Error al registrar el usuario. Intente nuevamente.');
       console.error('Registration error:', err);
     } finally {
       setIsLoading(false);
@@ -69,9 +73,9 @@ const Register: React.FC = () => {
       <h2 className="text-2xl font-bold text-center mb-6">Crear Cuenta</h2>
 
       {/* Mensaje de error */}
-      {error && (
+      {(error || authError) && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
-          {error}
+          {error || authError}
         </div>
       )}
 

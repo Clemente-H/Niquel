@@ -1,6 +1,8 @@
+// src/components/common/ProtectedRoute.tsx
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { IWithChildrenProps, UserRole } from '../../types';
+import { useAuth } from '../../store/AuthContext';
 
 /**
  * Props para el componente ProtectedRoute
@@ -18,17 +20,26 @@ const ProtectedRoute: React.FC<IProtectedRouteProps> = ({
   children,
   requiredRoles = []
 }) => {
-  // Mock de estado de autenticación (esto vendría del contexto de autenticación)
-  const isAuthenticated = true; // Cambiar a false para probar redirección
-  const userRole: UserRole = 'admin';
+  const { isAuthenticated, isLoading, user, hasRole } = useAuth();
+  const location = useLocation();
+
+  // Mostrar indicador de carga mientras se verifica la autenticación
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   // Verificar si el usuario está autenticado
   if (!isAuthenticated) {
-    return <Navigate to="/auth/login" replace />;
+    // Guardar la ubicación actual para redireccionar después del login
+    return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
   // Verificar si se requieren roles específicos
-  if (requiredRoles.length > 0 && !requiredRoles.includes(userRole)) {
+  if (requiredRoles.length > 0 && !hasRole(requiredRoles)) {
     // Redirigir a una página de acceso denegado o al dashboard
     return <Navigate to="/dashboard" replace />;
   }
