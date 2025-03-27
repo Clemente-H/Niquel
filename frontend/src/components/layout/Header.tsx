@@ -1,6 +1,8 @@
 import React from 'react';
 import { Menu, User } from 'lucide-react';
-import { IBaseComponentProps, UserRole } from '../../types';
+import { useNavigate } from 'react-router-dom';
+import { IBaseComponentProps } from '../../types';
+import { useAuth } from '../../store/AuthContext';
 
 /**
  * Props para el componente de encabezado
@@ -10,28 +12,17 @@ interface IHeaderProps extends IBaseComponentProps {
 }
 
 /**
- * Interfaz para datos de sesión del usuario
- */
-interface IUserSession {
-  name: string;
-  role: UserRole;
-}
-
-/**
  * Componente de encabezado para la aplicación
  * Muestra el título, botón de menú y detalles del usuario
  */
 const Header: React.FC<IHeaderProps> = ({ toggleSidebar, className = '' }) => {
-  // Mock del usuario logueado (esto vendría del contexto de autenticación)
-  const user: IUserSession = {
-    name: 'Usuario',
-    role: 'admin'
-  };
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   // Función para manejar el logout
   const handleLogout = (): void => {
-    // Lógica para cerrar sesión (vendría del contexto de autenticación)
-    console.log('Logout clicked');
+    logout();
+    navigate('/auth/login');
   };
 
   return (
@@ -51,7 +42,7 @@ const Header: React.FC<IHeaderProps> = ({ toggleSidebar, className = '' }) => {
         <div className="flex items-center space-x-4">
           <div className="flex items-center bg-blue-800 px-3 py-1 rounded-full">
             <User size={18} className="mr-2" />
-            <span>{`${user.name} (${user.role})`}</span>
+            <span>{`${user?.name || 'Usuario'} (${user?.role || 'invitado'})`}</span>
           </div>
           <button
             className="px-3 py-1 border border-white rounded hover:bg-blue-800"
