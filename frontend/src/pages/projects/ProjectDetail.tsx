@@ -133,15 +133,6 @@ const ProjectDetail: React.FC = () => {
           >
             Generar PDF
           </Button>
-
-          {hasAdminAccess && (
-            <Button
-              variant="secondary"
-              leftIcon={<Users size={16} />}
-            >
-              Gestionar Accesos
-            </Button>
-          )}
         </div>
       </div>
 

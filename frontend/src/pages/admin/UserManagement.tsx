@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import { Search, PlusCircle, X, Check, Users, MailOpen, Shield, Edit, Trash, Eye, EyeOff } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
-import { IUser, UserRole, UserStatus } from '../../types';
+import StatusBadge from '../../components/common/StatusBadge';
+import { IUser, UserRole, UserStatus, IUserCreate, IUserUpdate } from '../../types';
+import { useAuth } from '../../store/AuthContext';
+import { userService } from '../../services';
 
 const UserManagement: React.FC = () => {
   // Estados
@@ -11,51 +14,61 @@ const UserManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showAddUserModal, setShowAddUserModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [itemsPerPage] = useState<number>(10);
 
   // Estado para usuarios
   const [users, setUsers] = useState<IUser[]>([]);
 
   // Estado para el formulario de nuevo usuario
-  const [newUser, setNewUser] = useState({
+  const [newUser, setNewUser] = useState<IUserCreate>({
     name: '',
     email: '',
     password: '',
     role: 'regular'
   });
 
-  // Mock del rol de usuario actual
-  const currentUserRole: UserRole = 'admin';
+  // Estado para usuario en edición
+  const [editingUser, setEditingUser] = useState<{id: string, data: IUserUpdate} | null>(null);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+
+  // Obtener información del usuario autenticado
+  const { user: currentUser } = useAuth();
 
   // Comprobar si el usuario actual tiene permisos de administrador
-  const isAdmin = currentUserRole === "admin";
+  const isAdmin = currentUser?.role === "admin";
 
   // Cargar usuarios al iniciar
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        // Simular llamada a la API
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Datos dummy para usuarios
-        const usersData: IUser[] = [
-          { id: 1, name: "Carlos Méndez", email: "carlos@ejemplo.com", role: 'admin', status: 'active', lastLogin: "2025-03-20" },
-          { id: 2, name: "María González", email: "maria@ejemplo.com", role: 'manager', status: 'active', lastLogin: "2025-03-19" },
-          { id: 3, name: "Juan Rodríguez", email: "juan@ejemplo.com", role: 'regular', status: 'active', lastLogin: "2025-03-18" },
-          { id: 4, name: "Ana Martínez", email: "ana@ejemplo.com", role: 'regular', status: 'active', lastLogin: "2025-03-15" },
-          { id: 5, name: "Pedro López", email: "pedro@ejemplo.com", role: 'regular', status: 'inactive', lastLogin: "2025-02-28" },
-          { id: 6, name: "Laura Sánchez", email: "laura@ejemplo.com", role: 'manager', status: 'active', lastLogin: "2025-03-17" }
-        ];
-
-        setUsers(usersData);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchUsers();
-  }, []);
+  }, [currentPage]);
+
+  // Función para cargar usuarios desde la API
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Calcular los parámetros para paginación
+      const skip = (currentPage - 1) * itemsPerPage;
+
+      // Llamar al servicio de usuarios
+      const response = await userService.getUsers(currentPage, itemsPerPage);
+
+      setUsers(response.items);
+      setTotalUsers(response.total);
+      setTotalPages(response.pages);
+    } catch (error: any) {
+      console.error("Error fetching users:", error);
+      setError(error.message || "Error al cargar los usuarios");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Manejar cambios en el formulario de nuevo usuario
   const handleNewUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -66,29 +79,35 @@ const UserManagement: React.FC = () => {
     }));
   };
 
+  // Manejar cambios en el formulario de edición
+  const handleEditUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    if (editingUser) {
+      setEditingUser({
+        ...editingUser,
+        data: {
+          ...editingUser.data,
+          [name]: value
+        }
+      });
+    }
+  };
+
   // Manejar envío del formulario de nuevo usuario
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitLoading(true);
+    setError(null);
 
     try {
-      // Simular envío a la API
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Llamar al servicio para crear el usuario
+      const createdUser = await userService.createUser(newUser);
 
-      // Simular adición del nuevo usuario
-      const newId = users.length + 1;
-      const userToAdd: IUser = {
-        id: newId,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role as UserRole,
-        status: 'active',
-        lastLogin: ''
-      };
+      // Actualizar la lista de usuarios
+      await fetchUsers();
 
-      setUsers(prev => [...prev, userToAdd]);
+      // Cerrar el modal y limpiar formulario
       setShowAddUserModal(false);
-
-      // Resetear formulario
       setNewUser({
         name: '',
         email: '',
@@ -96,25 +115,101 @@ const UserManagement: React.FC = () => {
         role: 'regular'
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding user:", error);
+      setError(error.message || "Error al crear el usuario");
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
+  // Manejar envío del formulario de edición
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editingUser) return;
+
+    setSubmitLoading(true);
+    setError(null);
+
+    try {
+      // Llamar al servicio para actualizar el usuario
+      await userService.updateUser(editingUser.id, editingUser.data);
+
+      // Actualizar la lista de usuarios
+      await fetchUsers();
+
+      // Cerrar el modal y limpiar formulario
+      setShowEditModal(false);
+      setEditingUser(null);
+
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      setError(error.message || "Error al actualizar el usuario");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  // Preparar para editar un usuario
+  const startEditingUser = (user: IUser) => {
+    setEditingUser({
+      id: user.id.toString(),
+      data: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.status
+      }
+    });
+    setShowEditModal(true);
+  };
+
   // Manejar cambio de estado del usuario
-  const handleToggleUserStatus = (userId: number) => {
-    setUsers(prevUsers =>
-      prevUsers.map(user =>
-        user.id === userId
-          ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
-          : user
-      )
-    );
+  const handleToggleUserStatus = async (userId: number, currentStatus: UserStatus) => {
+    try {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
+      // Llamar al servicio para actualizar el estado
+      await userService.toggleUserStatus(userId.toString(), newStatus === 'active');
+
+      // Actualizar la lista de usuarios localmente para una experiencia más fluida
+      setUsers(prevUsers =>
+        prevUsers.map(user =>
+          user.id === userId
+            ? { ...user, status: newStatus }
+            : user
+        )
+      );
+    } catch (error: any) {
+      console.error("Error toggling user status:", error);
+      setError(error.message || "Error al cambiar el estado del usuario");
+    }
   };
 
   // Manejar eliminación de usuario
-  const handleDeleteUser = (userId: number) => {
-    setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+  const handleDeleteUser = async (userId: number) => {
+    if (!confirm("¿Está seguro que desea eliminar este usuario? Esta acción no se puede deshacer.")) {
+      return;
+    }
+
+    try {
+      // Llamar al servicio para eliminar el usuario
+      await userService.deleteUser(userId.toString());
+
+      // Actualizar la lista de usuarios
+      await fetchUsers();
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      setError(error.message || "Error al eliminar el usuario");
+    }
+  };
+
+  // Función para navegar entre páginas
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
   };
 
   // Filtrar usuarios según la pestaña seleccionada y el término de búsqueda
@@ -163,6 +258,13 @@ const UserManagement: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Mostrar mensaje de error */}
+        {error && (
+          <div className="mb-4 bg-red-50 border-l-4 border-red-400 p-4">
+            <p className="text-red-700">{error}</p>
+          </div>
+        )}
 
         {/* Pestañas para filtrar por tipo de usuario */}
         <div className="flex overflow-x-auto mb-4 border-b border-gray-200">
@@ -246,10 +348,11 @@ const UserManagement: React.FC = () => {
                           <button
                             className="p-1 text-blue-600 hover:bg-blue-50 rounded"
                             title="Editar"
+                            onClick={() => startEditingUser(user)}
                           >
                             <Edit size={16} />
                           </button>
-                          {user.role !== 'admin' && (
+                          {user.role !== 'admin' && currentUser?.id !== user.id && (
                             <button
                               className="p-1 text-red-600 hover:bg-red-50 rounded"
                               title="Eliminar"
@@ -261,7 +364,7 @@ const UserManagement: React.FC = () => {
                           <button
                             className="p-1 text-yellow-600 hover:bg-yellow-50 rounded"
                             title={user.status === 'active' ? 'Desactivar' : 'Activar'}
-                            onClick={() => handleToggleUserStatus(user.id)}
+                            onClick={() => handleToggleUserStatus(user.id, user.status)}
                           >
                             {user.status === 'active' ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
@@ -292,17 +395,31 @@ const UserManagement: React.FC = () => {
         {filteredUsers.length > 0 && (
           <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
             <div className="text-sm text-gray-700">
-              Mostrando <span className="font-medium">{filteredUsers.length}</span> usuarios
+              Mostrando <span className="font-medium">{filteredUsers.length}</span> de <span className="font-medium">{totalUsers}</span> usuarios
             </div>
 
             <div className="flex space-x-1">
-              <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+              <button
+                className={`px-3 py-1 ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} rounded`}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
                 Anterior
               </button>
-              <button className="px-3 py-1 bg-blue-600 text-white rounded">
-                1
-              </button>
-              <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`px-3 py-1 ${currentPage === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} rounded`}
+                  onClick={() => handlePageChange(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                className={`px-3 py-1 ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} rounded`}
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
                 Siguiente
               </button>
             </div>
@@ -393,8 +510,120 @@ const UserManagement: React.FC = () => {
                   variant="primary"
                   type="submit"
                   leftIcon={<Check size={18} />}
+                  isLoading={submitLoading}
                 >
                   Guardar Usuario
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para editar usuario */}
+      {showEditModal && editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-800">Editar Usuario</h3>
+              <button
+                className="text-gray-500 hover:text-gray-700"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingUser(null);
+                }}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateUser} className="p-6">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-medium mb-2">Nombre</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={editingUser.data.name || ''}
+                  onChange={handleEditUserChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Ingrese nombre completo"
+                  required
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-medium mb-2">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={editingUser.data.email || ''}
+                  onChange={handleEditUserChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="correo@ejemplo.com"
+                  required
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-medium mb-2">Contraseña (opcional)</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={editingUser.data.password || ''}
+                  onChange={handleEditUserChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Dejar en blanco para no cambiar"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-medium mb-2">Rol</label>
+                <select
+                  name="role"
+                  value={editingUser.data.role || ''}
+                  onChange={handleEditUserChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="admin">Administrador</option>
+                  <option value="manager">Manager</option>
+                  <option value="regular">Regular</option>
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-medium mb-2">Estado</label>
+                <select
+                  name="status"
+                  value={editingUser.data.status || ''}
+                  onChange={handleEditUserChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="active">Activo</option>
+                  <option value="inactive">Inactivo</option>
+                </select>
+              </div>
+
+              <div className="flex items-center mt-6">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingUser(null);
+                  }}
+                  type="button"
+                  className="mr-2"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  leftIcon={<Check size={18} />}
+                  isLoading={submitLoading}
+                >
+                  Actualizar Usuario
                 </Button>
               </div>
             </form>

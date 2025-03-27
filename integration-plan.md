@@ -73,14 +73,13 @@ The project is now at an integration phase:
 
 ### 5. User Management and Admin Features ⏳
 
-- [ ] Connect UserManagement page to the API
-- [ ] Implement user creation and editing
-- [ ] Set up role-based permissions throughout the app
-- [ ] Add project assignment functionality
+- [x] Connect UserManagement page to the API ✅
+- [x] Implement user creation and editing ✅
+- [x] Set up role-based permissions throughout the app ✅
+- [x] Add project assignment functionality ✅
 
-**Files to modify:**
+**Files to modified:**
 - `frontend/src/pages/admin/UserManagement.tsx`
-- `frontend/src/components/common/Table.tsx` (for reusable data tables)
 
 ### 6. Period Management and Visualization ⏳
 
