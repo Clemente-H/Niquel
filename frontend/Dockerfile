@@ -13,7 +13,7 @@ COPY . .
 # RUN npm run build
 
 # Set environment variables if needed
-# ENV VITE_API_BASE_URL=http://backend:8000
+ENV VITE_API_BASE_URL=http://backend:8000
 
 # Start the application
 EXPOSE 3000

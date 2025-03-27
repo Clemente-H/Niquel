@@ -5,6 +5,12 @@ import { resolve } from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    watch: {
+      usePolling: true,
+    },
+    host: true,
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

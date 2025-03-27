@@ -12,5 +12,8 @@ COPY . .
 # Create upload directory if it doesn't exist
 RUN mkdir -p ./data/uploads
 
+# Make scripts directory executable if it exists
+RUN if [ -d scripts ]; then chmod +x scripts/*.py; fi
+
 # Run the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

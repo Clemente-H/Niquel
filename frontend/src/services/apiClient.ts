@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } f
 
 // API URL proveniente de las variables de entorno
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-
+console.log('API_URL:', API_URL);
 /**
  * Cliente API base para comunicarse con el backend
  */
