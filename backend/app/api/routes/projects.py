@@ -2,13 +2,15 @@ from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import select, func
+from sqlalchemy import select, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from app.api.deps import CurrentUser, DbSession
 from app.core.exceptions import NotFoundException
 from app.db.models.project import Project
+from app.db.models.period import Period
+from app.db.models.file import File
 from app.db.models.assignment import UserAssignment
 from app.models.project import (
     Project as ProjectSchema,

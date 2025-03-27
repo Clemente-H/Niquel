@@ -1,52 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FileText, Clock, Map, ChevronLeft, Download, Users, PlusCircle, Calendar } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import StatusBadge from '../../components/common/StatusBadge';
 import { IProject, IPeriod, ProjectStatus, UserRole } from '../../types';
+import { useAuth } from '../../store/AuthContext';
+import { projectService, periodService, fileService } from '../../services';
 
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoadingPeriods, setIsLoadingPeriods] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [project, setProject] = useState<IProject | null>(null);
+  const [periods, setPeriods] = useState<IPeriod[]>([]);
+  const [currentPeriodData, setCurrentPeriodData] = useState<IPeriod | null>(null);
 
-  // Mock del rol de usuario (esto vendría del contexto de autenticación)
-  const userRole: UserRole = 'admin';
+  // Obtener información del usuario autenticado
+  const { user } = useAuth();
+  const userRole = user?.role as UserRole;
 
   // Determinar si mostrar opciones de admin/manager
   const hasAdminAccess = userRole === "admin" || userRole === "manager";
 
-  // Datos dummy del proyecto (esto vendría de una llamada a la API)
+  // Cargar proyecto
   useEffect(() => {
-    // Simular una llamada a la API
     const fetchProject = async () => {
+      if (!id) return;
+
+      setIsLoading(true);
+      setError(null);
+
       try {
-        // Simulación de tiempo de carga
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Datos dummy
-        const projectData: IProject = {
-          id: Number(id),
-          name: "Canal Los Andes",
-          description: "Proyecto de monitoreo y mantenimiento del Canal Los Andes, incluyendo análisis de caudal y calidad del agua en diferentes tramos.",
-          location: "Sector Norte - Coordenadas: 32°50'16.8\"S 70°35'56.4\"W",
-          owner: "Carlos Méndez",
-          status: "En progreso" as ProjectStatus,
-          startDate: "2024-10-15",
-          lastUpdate: "2025-03-18",
-          type: "Hidrología",
-        };
-
+        const projectData = await projectService.getProjectById(id);
         setProject(projectData);
-
-        // Establecer el primer período como seleccionado por defecto
-        if (availablePeriods.length > 0) {
-          setSelectedPeriod(availablePeriods[0].id);
-        }
-      } catch (error) {
-        console.error("Error fetching project:", error);
+      } catch (err) {
+        console.error("Error fetching project:", err);
+        setError("No se pudo cargar la información del proyecto.");
       } finally {
         setIsLoading(false);
       }
@@ -55,35 +48,51 @@ const ProjectDetail: React.FC = () => {
     fetchProject();
   }, [id]);
 
-  // Períodos disponibles (dummy)
-  const availablePeriods = [
-    { id: "marzo-2025", name: "Marzo 2025" },
-    { id: "febrero-2025", name: "Febrero 2025" },
-    { id: "enero-2025", name: "Enero 2025" },
-    { id: "diciembre-2024", name: "Diciembre 2024" },
-    { id: "noviembre-2024", name: "Noviembre 2024" }
-  ];
+  // Cargar períodos
+  useEffect(() => {
+    const fetchPeriods = async () => {
+      if (!id) return;
 
-  // Datos de análisis por período (dummy)
-  const periodData: Record<string, any> = {
-    "marzo-2025": {
-      volume: "0.0121 m³/s",
-      start_time: "00:03:48",
-      width: "417.99 m",
-      max_depth: "30.9 cm",
-      notes: "Incremento de sedimentos en el tramo 31"
-    },
-    "febrero-2025": {
-      volume: "0.0118 m³/s",
-      start_time: "00:04:15",
-      width: "415.50 m",
-      max_depth: "29.2 cm",
-      notes: "Condiciones normales en todos los tramos"
-    }
-  };
+      setIsLoadingPeriods(true);
 
-  // Datos del período actual
-  const currentPeriodData = selectedPeriod ? periodData[selectedPeriod] : null;
+      try {
+        const response = await periodService.getProjectPeriods(id);
+        setPeriods(response.items);
+
+        // Establecer el primer período como seleccionado por defecto
+        if (response.items.length > 0 && !selectedPeriod) {
+          setSelectedPeriod(response.items[0].id.toString());
+        }
+      } catch (err) {
+        console.error("Error fetching periods:", err);
+        // No mostramos error para no sobrecargar la interfaz
+      } finally {
+        setIsLoadingPeriods(false);
+      }
+    };
+
+    fetchPeriods();
+  }, [id, selectedPeriod]);
+
+  // Cargar datos del período seleccionado
+  useEffect(() => {
+    const fetchPeriodDetails = async () => {
+      if (!selectedPeriod) {
+        setCurrentPeriodData(null);
+        return;
+      }
+
+      try {
+        const periodData = await periodService.getPeriodById(selectedPeriod);
+        setCurrentPeriodData(periodData);
+      } catch (err) {
+        console.error("Error fetching period details:", err);
+        setCurrentPeriodData(null);
+      }
+    };
+
+    fetchPeriodDetails();
+  }, [selectedPeriod]);
 
   if (isLoading) {
     return (
@@ -93,11 +102,11 @@ const ProjectDetail: React.FC = () => {
     );
   }
 
-  if (!project) {
+  if (error || !project) {
     return (
       <div className="text-center py-10">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Proyecto no encontrado</h2>
-        <p className="text-gray-600 mb-4">El proyecto que estás buscando no existe o ha sido eliminado.</p>
+        <p className="text-gray-600 mb-4">{error || "El proyecto que estás buscando no existe o ha sido eliminado."}</p>
         <Link to="/dashboard" className="text-blue-600 hover:underline">
           Volver al Dashboard
         </Link>
@@ -180,7 +189,7 @@ const ProjectDetail: React.FC = () => {
                     <span className="font-medium text-gray-600 mr-2">Última actualización:</span>
                     <span className="flex items-center">
                       <Clock size={14} className="mr-1 text-gray-400" />
-                      {project.lastUpdate}
+                      {project.lastUpdate || project.updatedAt}
                     </span>
                   </li>
                 </ul>
@@ -190,7 +199,7 @@ const ProjectDetail: React.FC = () => {
             <div>
               <h3 className="font-semibold text-gray-700">Equipo</h3>
               <div className="flex flex-wrap mt-2">
-                {project.team ? (
+                {project.team && project.team.length > 0 ? (
                   project.team.map((member, index) => (
                     <span key={index} className="bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-sm mr-2 mb-2">
                       {member.name}
@@ -211,17 +220,25 @@ const ProjectDetail: React.FC = () => {
             </h3>
 
             <div className="mb-4">
-              <select
-                className="w-full p-2 border border-gray-300 rounded bg-white"
-                value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value)}
-              >
-                {availablePeriods.map(period => (
-                  <option key={period.id} value={period.id}>
-                    {period.name}
-                  </option>
-                ))}
-              </select>
+              {isLoadingPeriods ? (
+                <div className="py-2 flex justify-center">
+                  <div className="animate-spin h-5 w-5 border-2 border-blue-500 rounded-full border-t-transparent"></div>
+                </div>
+              ) : periods.length > 0 ? (
+                <select
+                  className="w-full p-2 border border-gray-300 rounded bg-white"
+                  value={selectedPeriod}
+                  onChange={(e) => setSelectedPeriod(e.target.value)}
+                >
+                  {periods.map(period => (
+                    <option key={period.id} value={period.id.toString()}>
+                      {period.periodName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="text-gray-500 text-sm italic">No hay períodos disponibles.</div>
+              )}
             </div>
 
             {hasAdminAccess && (
@@ -242,19 +259,19 @@ const ProjectDetail: React.FC = () => {
                 <ul className="space-y-2 text-sm">
                   <li className="flex justify-between">
                     <span className="text-gray-600">Volumen:</span>
-                    <span className="font-medium">{currentPeriodData.volume}</span>
+                    <span className="font-medium">{currentPeriodData.volume || 'N/A'}</span>
                   </li>
                   <li className="flex justify-between">
                     <span className="text-gray-600">Hora inicio:</span>
-                    <span className="font-medium">{currentPeriodData.start_time}</span>
+                    <span className="font-medium">{currentPeriodData.startTime || 'N/A'}</span>
                   </li>
                   <li className="flex justify-between">
                     <span className="text-gray-600">Ancho:</span>
-                    <span className="font-medium">{currentPeriodData.width}</span>
+                    <span className="font-medium">{currentPeriodData.width || 'N/A'}</span>
                   </li>
                   <li className="flex justify-between">
                     <span className="text-gray-600">Profundidad máx:</span>
-                    <span className="font-medium">{currentPeriodData.max_depth}</span>
+                    <span className="font-medium">{currentPeriodData.maxDepth || 'N/A'}</span>
                   </li>
                 </ul>
               ) : (
@@ -267,7 +284,7 @@ const ProjectDetail: React.FC = () => {
 
       {/* Mapa */}
       <Card
-        title={`Mapa de Recorrido - ${availablePeriods.find(p => p.id === selectedPeriod)?.name || 'Sin período seleccionado'}`}
+        title={`Mapa de Recorrido - ${selectedPeriod ? periods.find(p => p.id.toString() === selectedPeriod)?.periodName || 'Sin período seleccionado' : 'Sin período seleccionado'}`}
         icon={<Map size={18} className="mr-2" />}
       >
         <div className="bg-gray-100 p-4 rounded-md">

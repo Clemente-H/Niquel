@@ -41,68 +41,94 @@ class ProjectService {
       url += `&status=${status}`;
     }
 
-    const response = await apiClient.get<IProjectListResponse>(url);
+    try {
+      const response = await apiClient.get<IProjectListResponse>(url);
 
-    // Transformar datos para asegurar que cumplen con la interfaz IProject
-    const transformedItems = response.data.items.map(project => this.transformProjectData(project));
+      // Transformar datos para asegurar que cumplen con la interfaz IProject
+      const transformedItems = response.data.items.map(project => this.transformProjectData(project));
 
-    return {
-      ...response.data,
-      items: transformedItems
-    };
+      return {
+        ...response.data,
+        items: transformedItems
+      };
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      // Reenviar el error para que el componente pueda manejarlo
+      throw error;
+    }
   }
 
   /**
    * Obtener un proyecto por su ID con estadísticas
    */
   public async getProjectById(id: string): Promise<IProject> {
-    const response = await apiClient.get<IProjectStatsResponse>(`${this.baseUrl}/${id}`);
-    return this.transformProjectData(response.data);
+    try {
+      const response = await apiClient.get<IProjectStatsResponse>(`${this.baseUrl}/${id}`);
+      return this.transformProjectData(response.data);
+    } catch (error) {
+      console.error(`Error fetching project with ID ${id}:`, error);
+      throw error;
+    }
   }
 
   /**
    * Crear un nuevo proyecto
    */
   public async createProject(projectData: IProjectCreate): Promise<IProject> {
-    // Transformar nombres de campos a snake_case para el backend
-    const apiData = {
-      name: projectData.name,
-      description: projectData.description,
-      location: projectData.location,
-      type: projectData.type,
-      status: projectData.status,
-      start_date: projectData.startDate,
-      owner_id: projectData.ownerId
-    };
+    try {
+      // Transformar nombres de campos a snake_case para el backend
+      const apiData = {
+        name: projectData.name,
+        description: projectData.description,
+        location: projectData.location,
+        type: projectData.type,
+        status: projectData.status,
+        start_date: projectData.startDate,
+        owner_id: projectData.ownerId
+      };
 
-    const response = await apiClient.post<IProject>(this.baseUrl, apiData);
-    return this.transformProjectData(response.data);
+      const response = await apiClient.post<IProject>(this.baseUrl, apiData);
+      return this.transformProjectData(response.data);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      throw error;
+    }
   }
 
   /**
    * Actualizar un proyecto existente
    */
   public async updateProject(id: string, projectData: IProjectUpdate): Promise<IProject> {
-    // Eliminar campos undefined
-    const updateData: any = {};
+    try {
+      // Eliminar campos undefined y transformar a snake_case
+      const updateData: any = {};
 
-    if (projectData.name !== undefined) updateData.name = projectData.name;
-    if (projectData.description !== undefined) updateData.description = projectData.description;
-    if (projectData.location !== undefined) updateData.location = projectData.location;
-    if (projectData.type !== undefined) updateData.type = projectData.type;
-    if (projectData.status !== undefined) updateData.status = projectData.status;
-    if (projectData.startDate !== undefined) updateData.start_date = projectData.startDate;
-    if (projectData.ownerId !== undefined) updateData.owner_id = projectData.ownerId;
+      if (projectData.name !== undefined) updateData.name = projectData.name;
+      if (projectData.description !== undefined) updateData.description = projectData.description;
+      if (projectData.location !== undefined) updateData.location = projectData.location;
+      if (projectData.type !== undefined) updateData.type = projectData.type;
+      if (projectData.status !== undefined) updateData.status = projectData.status;
+      if (projectData.startDate !== undefined) updateData.start_date = projectData.startDate;
+      if (projectData.ownerId !== undefined) updateData.owner_id = projectData.ownerId;
 
-    const response = await apiClient.put<IProject>(`${this.baseUrl}/${id}`, updateData);
-    return this.transformProjectData(response.data);
+      const response = await apiClient.put<IProject>(`${this.baseUrl}/${id}`, updateData);
+      return this.transformProjectData(response.data);
+    } catch (error) {
+      console.error(`Error updating project with ID ${id}:`, error);
+      throw error;
+    }
   }
 
   /**
    * Eliminar un proyecto
    */
   public async deleteProject(id: string): Promise<void> {
-    await apiClient.delete(`${this.baseUrl}/${id}`);
+    try {
+      await apiClient.delete(`${this.baseUrl}/${id}`);
+    } catch (error) {
+      console.error(`Error deleting project with ID ${id}:`, error);
+      throw error;
+    }
   }
 
   /**

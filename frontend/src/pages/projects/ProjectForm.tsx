@@ -3,14 +3,20 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Save, X, Upload, Map, Users, Calendar, Compass, FileText, Info } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
-import { IProjectCreate, IProject, ProjectStatus, ProjectType, UserRole } from '../../types';
+import { IProjectCreate, IProject, ProjectStatus, ProjectType, UserRole, IUser } from '../../types';
+import { useAuth } from '../../store/AuthContext';
+import { projectService, userService, assignmentService } from '../../services';
 
 const ProjectForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = id !== undefined;
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingProject, setLoadingProject] = useState<boolean>(false);
+  const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [showUserModal, setShowUserModal] = useState<boolean>(false);
+  const [availableUsers, setAvailableUsers] = useState<IUser[]>([]);
 
   // Estado para el formulario
   const [formData, setFormData] = useState<IProjectCreate>({
@@ -19,60 +25,98 @@ const ProjectForm: React.FC = () => {
     location: '',
     type: 'Hidrología',
     status: 'Planificación',
-    startDate: '',
-    ownerId: 1 // Default owner ID (in a real app this would come from context or be selectable)
+    startDate: new Date().toISOString().split('T')[0],
+    ownerId: 0 // Default owner ID, se actualizará con el usuario actual
   });
 
-  // Estado para archivos seleccionados (dummy)
+  // Estado para archivos seleccionados
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
-  // Estado para usuarios asignados al proyecto (dummy)
-  const [assignedUsers, setAssignedUsers] = useState<{id: number, name: string, role: string}[]>([]);
+  // Estado para usuarios asignados al proyecto
+  const [assignedUsers, setAssignedUsers] = useState<IUser[]>([]);
 
-  // Datos dummy para usuarios disponibles
-  const availableUsers = [
-    { id: 3, name: "Juan Rodríguez", role: "regular" },
-    { id: 4, name: "Ana Martínez", role: "regular" },
-    { id: 5, name: "Pedro López", role: "regular" },
-    { id: 6, name: "Laura Sánchez", role: "manager" }
-  ];
+  // Obtener información del usuario autenticado
+  const { user } = useAuth();
+
+  // Establecer el ID del usuario actual como owner por defecto
+  useEffect(() => {
+    if (user && user.id && !isEditing) {
+      setFormData(prev => ({
+        ...prev,
+        ownerId: user.id
+      }));
+    }
+  }, [user, isEditing]);
+
+  // Cargar usuarios disponibles
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (user?.role !== 'admin' && user?.role !== 'manager') return;
+
+      setLoadingUsers(true);
+      try {
+        const response = await userService.getUsers();
+        setAvailableUsers(response.items);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    fetchUsers();
+  }, [user?.role]);
 
   // Cargar datos del proyecto si estamos en modo edición
   useEffect(() => {
-    if (isEditing) {
+    if (isEditing && id) {
       const fetchProject = async () => {
-        setIsLoading(true);
-        try {
-          // Simulamos una llamada API
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        setLoadingProject(true);
+        setError(null);
 
-          // Datos dummy para edición
+        try {
+          // Cargar datos del proyecto
+          const projectData = await projectService.getProjectById(id);
+
+          // Actualizar formulario con datos del proyecto
           setFormData({
-            name: "Canal Los Andes",
-            description: "Proyecto de monitoreo y mantenimiento del Canal Los Andes, incluyendo análisis de caudal y calidad del agua en diferentes tramos.",
-            location: "Sector Norte - Coordenadas: 32°50'16.8\"S 70°35'56.4\"W",
-            type: 'Hidrología',
-            status: 'En progreso',
-            startDate: "2024-10-15",
-            ownerId: 1
+            name: projectData.name,
+            description: projectData.description || '',
+            location: projectData.location || '',
+            type: projectData.type || 'Hidrología',
+            status: projectData.status || 'Planificación',
+            startDate: projectData.startDate || new Date().toISOString().split('T')[0],
+            ownerId: projectData.ownerId || user?.id || 0
           });
 
-          // Usuarios asignados
-          setAssignedUsers([
-            { id: 3, name: "Juan Rodríguez", role: "regular" },
-            { id: 4, name: "Ana Martínez", role: "regular" }
-          ]);
+          // Cargar asignaciones del proyecto
+          try {
+            const assignmentsResponse = await assignmentService.getProjectAssignments(id);
+            const userIds = assignmentsResponse.items.map(assignment => assignment.userId);
+            if (userIds.length > 0) {
+              const usersPromises = userIds.map(userId =>
+                userService.getUserById(userId.toString())
+              );
+              const usersData = await Promise.all(usersPromises);
+              setAssignedUsers(usersData.filter(Boolean)); // Filtramos posibles valores null
+            } else {
+              setAssignedUsers([]);
+            }
+          } catch (assignError) {
+            console.error("Error fetching project assignments:", assignError);
+          }
 
-        } catch (error) {
-          console.error("Error fetching project:", error);
+        } catch (err) {
+          console.error("Error fetching project:", err);
+          setError("No se pudo cargar la información del proyecto.");
         } finally {
-          setIsLoading(false);
+          setLoadingProject(false);
         }
       };
 
       fetchProject();
     }
-  }, [id, isEditing]);
+  }, [id, isEditing, user?.id]);
 
   // Manejar cambios en los campos del formulario
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -113,15 +157,44 @@ const ProjectForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
-      // Simular envío a la API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      let projectId: number | string;
+
+      if (isEditing && id) {
+        // Actualizar proyecto existente
+        await projectService.updateProject(id, formData);
+        projectId = id;
+      } else {
+        // Crear nuevo proyecto
+        const newProject = await projectService.createProject(formData);
+        projectId = newProject.id;
+      }
+
+      // Manejar asignaciones de usuarios si es necesario
+      if (assignedUsers.length > 0) {
+        // Obtener IDs de usuarios asignados
+        const userIds = assignedUsers.map(u => u.id);
+
+        // Realizar asignación batch
+        try {
+          await assignmentService.batchAssignUsers(
+            projectId.toString(),
+            userIds.map(id => id.toString()),
+            'viewer' // Rol por defecto
+          );
+        } catch (assignError) {
+          console.error("Error assigning users:", assignError);
+          // No interrumpimos el flujo por error en asignaciones
+        }
+      }
 
       // Redirigir al dashboard
       navigate('/dashboard');
     } catch (error) {
       console.error("Error saving project:", error);
+      setError("Ocurrió un error al guardar el proyecto. Por favor, intente nuevamente.");
     } finally {
       setIsLoading(false);
     }
@@ -146,16 +219,23 @@ const ProjectForm: React.FC = () => {
           onClick={handleSubmit}
           type="submit"
         >
-          Guardar Proyecto
+          {isEditing ? 'Actualizar Proyecto' : 'Guardar Proyecto'}
         </Button>
       </div>
+
+      {/* Mensaje de error global */}
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         {/* Información Básica */}
         <Card
           title="Información Básica"
           icon={<Info size={20} className="text-blue-600" />}
-          isLoading={isLoading && isEditing}
+          isLoading={loadingProject}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -258,9 +338,18 @@ const ProjectForm: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   required
                 >
-                  <option value={1}>Carlos Méndez (Admin)</option>
-                  <option value={2}>María González (Manager)</option>
-                  <option value={6}>Laura Sánchez (Manager)</option>
+                  {user && (
+                    <option value={user.id}>
+                      {user.name} (Yo)
+                    </option>
+                  )}
+                  {availableUsers
+                    .filter(u => u.id !== user?.id)
+                    .map(u => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} ({u.role})
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -289,6 +378,7 @@ const ProjectForm: React.FC = () => {
         <Card
           title="Asignación de Usuarios"
           icon={<Users size={20} className="text-blue-600" />}
+          isLoading={loadingUsers}
         >
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
             <p className="text-gray-600 mb-3 sm:mb-0">
@@ -331,7 +421,7 @@ const ProjectForm: React.FC = () => {
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             user.role === 'manager' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
                           }`}>
-                            {user.role === 'manager' ? 'Manager' : 'Regular'}
+                            {user.role === 'manager' ? 'Manager' : user.role === 'admin' ? 'Admin' : 'Regular'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -458,9 +548,12 @@ const ProjectForm: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              user.role === 'manager' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                              user.role === 'manager' ? 'bg-yellow-100 text-yellow-800' :
+                              user.role === 'admin' ? 'bg-red-100 text-red-800' :
+                              'bg-green-100 text-green-800'
                             }`}>
-                              {user.role === 'manager' ? 'Manager' : 'Regular'}
+                              {user.role === 'manager' ? 'Manager' :
+                               user.role === 'admin' ? 'Admin' : 'Regular'}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
