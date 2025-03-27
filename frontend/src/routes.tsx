@@ -2,6 +2,8 @@ import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/layout/DashboardLayout';
 import AuthLayout from './components/layout/AuthLayout';
+import ProtectedRoute from './components/common/ProtectedRoute';
+import { UserRole } from './types';
 
 // Placeholder para el componente de carga
 const LoadingFallback = () => (
@@ -26,21 +28,35 @@ const AppRoutes: React.FC = () => {
         {/* Ruta raíz redirecta al dashboard */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        {/* Rutas de autenticación */}
+        {/* Rutas de autenticación (no protegidas) */}
         <Route path="/auth" element={<AuthLayout />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Route>
 
-        {/* Rutas protegidas del dashboard */}
-        <Route path="/" element={<DashboardLayout />}>
+        {/* Rutas protegidas del dashboard - envueltas en ProtectedRoute */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="projects" element={<ProjectList />} />
           <Route path="projects/new" element={<ProjectForm />} />
           <Route path="projects/:id" element={<ProjectDetail />} />
           <Route path="projects/:id/edit" element={<ProjectForm />} />
-          <Route path="admin/users" element={<UserManagement />} />
-          <Route path="admin/settings" element={<div>Configuración del sistema</div>} />
+
+          {/* Rutas de administración con roles específicos */}
+          <Route path="admin/users" element={
+            <ProtectedRoute requiredRoles={['admin', 'manager']}>
+              <UserManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="admin/settings" element={
+            <ProtectedRoute requiredRoles={['admin']}>
+              <div>Configuración del sistema</div>
+            </ProtectedRoute>
+          } />
         </Route>
 
         {/* Ruta para páginas no encontradas */}

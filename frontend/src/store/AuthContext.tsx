@@ -29,39 +29,42 @@ interface AuthProviderProps {
 // Proveedor del contexto de autenticación
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<IUser | null>(null);
-  const [token, setToken] = useState<string | null>(authService.isAuthenticated() ? authService.getAuthToken() : null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Cargar el usuario al iniciar o cuando cambia el token
+  // Cargar el usuario al iniciar
   useEffect(() => {
     const loadUser = async () => {
-      if (token) {
-        try {
-          setIsLoading(true);
+      setIsLoading(true);
+      try {
+        // Verificar si hay un token en localStorage
+        const storedToken = authService.getAuthToken();
+
+        if (storedToken) {
+          // Si hay un token, verificar si es válido intentando obtener el usuario
           const user = await authService.getCurrentUser();
           if (user) {
             setUser(user);
+            setToken(storedToken);
           } else {
-            // Si no hay usuario (token inválido), limpiar el estado
-            setToken(null);
+            // Si no hay usuario (token inválido), limpiar el estado y localStorage
             authService.logout();
+            setToken(null);
           }
-        } catch (error) {
-          console.error('Error loading user:', error);
-          setToken(null);
-          authService.logout();
-        } finally {
-          setIsLoading(false);
         }
-      } else {
-        setUser(null);
+      } catch (error) {
+        console.error('Error loading user:', error);
+        // Si hay un error, limpiar el estado y localStorage
+        authService.logout();
+        setToken(null);
+      } finally {
         setIsLoading(false);
       }
     };
 
     loadUser();
-  }, [token]);
+  }, []);
 
   // Función para iniciar sesión
   const login = async (credentials: ILoginCredentials) => {
