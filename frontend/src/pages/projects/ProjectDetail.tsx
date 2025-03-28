@@ -119,7 +119,7 @@ const ProjectDetail: React.FC = () => {
       {/* Navigation bar with actions */}
       <div className="flex justify-between items-center">
         <Link
-          to="/dashboard"
+          to="/projects"
           className="flex items-center text-gray-600 hover:text-gray-900"
         >
           <ChevronLeft size={20} className="mr-1" />
@@ -235,7 +235,7 @@ const ProjectDetail: React.FC = () => {
             {/* Period action buttons */}
             <div className="space-y-2">
               {hasAdminAccess && (
-                <Link to="/projects/${id}/periods/new">
+                <Link to={`/projects/${id}/periods/new`}>
                   <Button
                     variant="primary"
                     leftIcon={<PlusCircle size={16} />}
