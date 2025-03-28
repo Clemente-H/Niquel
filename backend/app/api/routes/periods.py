@@ -88,6 +88,7 @@ async def create_period(
         )
 
     # Create new period
+    # Dentro de la función create_period
     period = Period(
         project_id=project_id,
         name=period_data.name,
@@ -99,6 +100,7 @@ async def create_period(
         max_depth=period_data.max_depth,
         notes=period_data.notes,
         created_by=current_user.id,
+        kml_file_id=period_data.kml_file_id,
     )
 
     db.add(period)
@@ -172,6 +174,8 @@ async def update_period(
 
     # Update period fields
     for key, value in period_data.dict(exclude_unset=True).items():
+        if key == "kml_file_id" and value is None:
+            continue
         setattr(period, key, value)
 
     await db.commit()

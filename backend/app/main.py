@@ -3,7 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 from app.core.config import settings
-from app.api.routes import auth, users, projects, periods, files, assignments
+from app.api.routes import (
+    auth,
+    users,
+    projects,
+    periods,
+    files,
+    assignments,
+    geo_points,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -44,6 +52,7 @@ app.include_router(projects.router, prefix=f"{settings.API_V1_STR}")
 app.include_router(periods.router, prefix=f"{settings.API_V1_STR}")
 app.include_router(files.router, prefix=f"{settings.API_V1_STR}")
 app.include_router(assignments.router, prefix=f"{settings.API_V1_STR}")
+app.include_router(geo_points.router, prefix=f"{settings.API_V1_STR}")
 
 
 @app.get("/")

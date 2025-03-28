@@ -64,35 +64,40 @@ Integrar un sistema de visualización de mapas KML/KMZ que permita:
 
 ### Fase 2: APIs y Endpoints
 
-#### Paso 1: CRUD de Puntos Geográficos
+#### ✅ Paso 1: CRUD de Puntos Geográficos
 
-**Backend - Endpoints**
-- Implementar endpoints para gestión de GeoPoints:
+**Backend - Endpoints** ✅
+- ✅ Implementar endpoints para gestión de GeoPoints:
   ```
-  GET    /api/periods/{period_id}/geopoints
-  POST   /api/periods/{period_id}/geopoints
-  GET    /api/geopoints/{geopoint_id}
-  PUT    /api/geopoints/{geopoint_id}
-  DELETE /api/geopoints/{geopoint_id}
+  GET    /api/periods/{period_id}/geo-points
+  POST   /api/periods/{period_id}/geo-points
+  GET    /api/geo-points/{geopoint_id}
+  PUT    /api/geo-points/{geopoint_id}
+  DELETE /api/geo-points/{geopoint_id}
   ```
 
-- Mejorar endpoint de Period para manejar archivos KML/KMZ:
+- ✅ Mejorar endpoint de Period para manejar archivos KML/KMZ:
   ```
   POST /api/projects/{project_id}/periods
   PUT  /api/periods/{period_id}
   ```
 
-#### Paso 2: API para Relación Puntos-Imágenes
+#### ✅ Paso 2: API para Relación Puntos-Imágenes
 
-**Backend - Endpoints**
-- Implementar endpoints para asociar imágenes con puntos:
+**Backend - Endpoints** ✅
+- ✅ Implementar endpoints para asociar imágenes con puntos:
   ```
-  POST /api/geopoints/{geopoint_id}/images
-  GET  /api/geopoints/{geopoint_id}/images
-  DELETE /api/geopoints/{geopoint_id}/images/{image_id}
+  POST /api/geo-points/{geopoint_id}/images
+  GET  /api/geo-points/{geopoint_id}/images
+  DELETE /api/geo-points/{geopoint_id}/images/{image_id}
   ```
 
-- Mejorar servicio de archivos para manejar metadatos extendidos
+- ✅ Mejorar servicio de archivos para manejar metadatos extendidos
+
+**Implementado:**
+- API completo para gestión de puntos geográficos
+- API para gestión de imágenes asociadas a puntos
+- Actualización de endpoints de periodos para manejar archivos KML
 
 ### Fase 3: Implementación Frontend
 
