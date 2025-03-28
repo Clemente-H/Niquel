@@ -2,12 +2,17 @@ from __future__ import annotations
 
 import uuid
 import datetime
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 from sqlalchemy import String, ForeignKey, Date, Text, Float, Time, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+# Only import File when type checking to avoid circular import
+if TYPE_CHECKING:
+    from app.db.models.file import File
+    from app.db.models.geo_point import GeoPoint
 
 
 class Period(Base):
@@ -40,6 +45,7 @@ class Period(Base):
         "User", back_populates="created_periods", foreign_keys=[created_by]
     )
 
+    # Change to a viewonly relationship to prevent circular dependency issues
     files: Mapped[List["File"]] = relationship(
         "File",
         primaryjoin="Period.id == File.period_id",
@@ -50,11 +56,15 @@ class Period(Base):
 
     # Reference to the main KML file
     kml_file_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid, nullable=True)
+
+    # This is where we fix the circular dependency
+    # Make the relationship viewonly and use string references
     kml_file: Mapped[Optional["File"]] = relationship(
         "File",
         primaryjoin="File.id == Period.kml_file_id",
+        foreign_keys=[kml_file_id],
         uselist=False,
-        viewonly=True,  # Marca como solo lectura
+        viewonly=True,  # Mark as read-only
     )
 
     # Geo points associated with this period

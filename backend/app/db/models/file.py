@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import uuid
 import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from sqlalchemy import String, Integer, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+# Only import when type checking
+if TYPE_CHECKING:
+    from app.db.models.project import Project
+    from app.db.models.period import Period
+    from app.db.models.user import User
 
 
 class File(Base):
@@ -47,7 +53,7 @@ class File(Base):
     period: Mapped[Optional["Period"]] = relationship(
         "Period",
         primaryjoin="File.period_id == Period.id",
-        foreign_keys="[File.period_id]",
+        foreign_keys=[period_id],
         back_populates="files",
     )
     uploader: Mapped[Optional["User"]] = relationship(
