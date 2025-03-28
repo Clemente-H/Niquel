@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ChevronLeft, Save, Calculator, Clock, Calendar } from 'lucide-react';
+import { ChevronLeft, Save, Calculator, Clock, Calendar, File } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import { IPeriodCreate, IPeriodUpdate, IPeriod } from '../../types';
-import { periodService, projectService } from '../../services';
+import { periodService, projectService, fileService } from '../../services';
 
 interface IPeriodFormProps {
   isEdit?: boolean;
@@ -17,6 +17,8 @@ const PeriodForm: React.FC<IPeriodFormProps> = ({ isEdit = false }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [projectName, setProjectName] = useState<string>('');
+  const [kmlFile, setKmlFile] = useState<File | null>(null);
+  const [kmlFileId, setKmlFileId] = useState<string | null>(null);
 
   // Initialize form data with default values
   const [formData, setFormData] = useState<IPeriodCreate | IPeriodUpdate>({
@@ -56,6 +58,11 @@ const PeriodForm: React.FC<IPeriodFormProps> = ({ isEdit = false }) => {
             maxDepth: period.maxDepth || '',
             notes: period.notes || ''
           });
+
+          // Set kmlFileId if exists
+          if (period.kmlFileId) {
+            setKmlFileId(period.kmlFileId);
+          }
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -77,6 +84,13 @@ const PeriodForm: React.FC<IPeriodFormProps> = ({ isEdit = false }) => {
     }));
   };
 
+  // Handle KML file selection
+  const handleKmlFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setKmlFile(e.target.files[0]);
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,13 +102,40 @@ const PeriodForm: React.FC<IPeriodFormProps> = ({ isEdit = false }) => {
         throw new Error('Project ID is required');
       }
 
+      // Upload KML file if selected
+      let newKmlFileId = kmlFileId;
+      if (kmlFile) {
+        try {
+          const formData = new FormData();
+          formData.append('file', kmlFile);
+          formData.append('project_id', projectId);
+          formData.append('category', 'map');
+
+          const uploadedFile = await fileService.uploadFile(
+            kmlFile,
+            projectId,
+            undefined,
+            'map');
+          newKmlFileId = uploadedFile.id.toString();
+        } catch (fileErr) {
+          console.error('Error uploading KML file:', fileErr);
+          throw new Error('Error uploading KML/KMZ file. Please try again.');
+        }
+      }
+
+      // Prepare period data with KML file ID
+      const periodDataToSend = {
+        ...formData,
+        kmlFileId: newKmlFileId
+      };
+
       if (isEdit && periodId) {
         // Update existing period
-        await periodService.updatePeriod(periodId, formData as IPeriodUpdate);
+        await periodService.updatePeriod(periodId, periodDataToSend as IPeriodUpdate);
       } else {
         // Create new period
         await periodService.createPeriod(projectId, {
-          ...formData as IPeriodCreate,
+          ...periodDataToSend as IPeriodCreate,
           projectId: Number(projectId)
         });
       }
@@ -275,6 +316,29 @@ const PeriodForm: React.FC<IPeriodFormProps> = ({ isEdit = false }) => {
                     placeholder="e.g., 185.5"
                   />
                 </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  KML/KMZ File (optional)
+                </label>
+                <div className="flex">
+                  <input
+                    type="file"
+                    accept=".kml,.kmz"
+                    onChange={handleKmlFileSelect}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  {kmlFileId && !kmlFile && (
+                    <div className="ml-2 px-3 py-2 bg-gray-100 rounded-md flex items-center">
+                      <File size={18} className="text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-600">File uploaded</span>
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Upload a KML or KMZ file with route and points for this period.
+                </p>
               </div>
             </div>
 

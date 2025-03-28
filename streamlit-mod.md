@@ -105,7 +105,7 @@ Integrar un sistema de visualización de mapas KML/KMZ que permita:
 
 #### Paso 1: Componente de Visualización de Mapas
 
-**Frontend - Componentes**
+**Frontend - Componentes** ✅
 - Crear componente `MapViewer`:
   - Integrar biblioteca Leaflet
   - Implementar carga y renderizado de archivos KML/KMZ
@@ -123,7 +123,7 @@ interface MapViewerProps {
 
 #### Paso 2: Interacción con Puntos y UI de Edición
 
-**Frontend - Componentes**
+**Frontend - Componentes** ✅
 - Desarrollar componente `GeoPointDetails`:
   - Mostrar información detallada del punto
   - Galería de imágenes asociadas
@@ -134,7 +134,7 @@ interface MapViewerProps {
   - Selector de nivel de gravedad
   - Interfaz para asociar imágenes
 
-- Mejorar `PeriodForm` y `PeriodDetail` para integrar nuevos componentes
+- Mejorar `PeriodForm` y `PeriodDetail` para integrar nuevos componentes ✅
 
 ### Fase 4: Integración y Refinamiento
 

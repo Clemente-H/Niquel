@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Edit, Trash, Download, MapPin, FileText, Calendar, Clock, Droplet, Ruler } from 'lucide-react';
+import { ChevronLeft, Edit, Trash, Download, MapPin, FileText, Calendar, Clock, Droplet, Ruler, PlusCircle, Eye, Map } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import FileUploader from '../../components/common/FileUploader';
 import { IPeriod, IProjectFile } from '../../types';
 import { periodService, fileService, projectService } from '../../services';
 import { useAuth } from '../../store/AuthContext';
+import MapViewer from '../../components/maps/MapViewer';
+import GeoPointDetails from '../../components/maps/GeoPointDetails';
+import GeoPointEditor from '../../components/maps/GeoPointEditor';
+import { IGeoPoint } from '../../types/geoPoint.types';
+import { geoPointService } from '../../services';
 
 const PeriodDetail: React.FC = () => {
   const { projectId, periodId } = useParams<{ projectId: string; periodId: string }>();
@@ -20,6 +25,11 @@ const PeriodDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [fileCategory, setFileCategory] = useState<'map' | 'image' | 'document' | 'analysis'>('document');
+  const [geoPoints, setGeoPoints] = useState<IGeoPoint[]>([]);
+  const [loadingGeoPoints, setLoadingGeoPoints] = useState<boolean>(true);
+  const [selectedGeoPoint, setSelectedGeoPoint] = useState<IGeoPoint | null>(null);
+  const [showAddGeoPointModal, setShowAddGeoPointModal] = useState<boolean>(false);
+
 
   // User permission check
   const canEdit = user?.role === 'admin' || user?.role === 'manager';
@@ -29,6 +39,7 @@ const PeriodDetail: React.FC = () => {
       if (!periodId || !projectId) return;
 
       setIsLoading(true);
+      setLoadingGeoPoints(true);
       setError(null);
 
       try {
@@ -43,11 +54,15 @@ const PeriodDetail: React.FC = () => {
         // Fetch files associated with this period
         const filesResponse = await fileService.getFiles(1, 50, projectId, periodId);
         setFiles(filesResponse.items);
+
+        const geopointsResponse = await geoPointService.getGeoPointsByPeriod(periodId);
+        setGeoPoints(geopointsResponse.items);
       } catch (err) {
         console.error('Error fetching period data:', err);
         setError('Error loading period data. Please try again.');
       } finally {
         setIsLoading(false);
+        setLoadingGeoPoints(false);
       }
     };
 
@@ -84,6 +99,51 @@ const PeriodDetail: React.FC = () => {
       console.error('Error deleting period:', err);
       setError('Error deleting period. Please try again.');
       setIsDeleting(false);
+    }
+  };
+
+  const handleGeoPointClick = (point: IGeoPoint) => {
+    setSelectedGeoPoint(point);
+  };
+
+  const handleGeoPointSave = async (savedPoint: IGeoPoint) => {
+    // Update or add point to the list
+    setGeoPoints(prevPoints => {
+      const existingPointIndex = prevPoints.findIndex(p => p.id === savedPoint.id);
+
+      if (existingPointIndex >= 0) {
+        // Update existing point
+        const updatedPoints = [...prevPoints];
+        updatedPoints[existingPointIndex] = savedPoint;
+        return updatedPoints;
+      } else {
+        // Add new point
+        return [...prevPoints, savedPoint];
+      }
+    });
+
+    // Cerrar modales
+    setShowAddGeoPointModal(false);
+    setSelectedGeoPoint(null);
+  };
+
+  const handleDeleteGeoPoint = async (pointId: string) => {
+    if (!confirm('¿Está seguro que desea eliminar este punto? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      await geoPointService.deleteGeoPoint(pointId);
+      // Refresh points list
+      setGeoPoints(prevPoints => prevPoints.filter(p => p.id !== pointId));
+
+      // close modal if the deleted point was selected
+      if (selectedGeoPoint && selectedGeoPoint.id === pointId) {
+        setSelectedGeoPoint(null);
+      }
+    } catch (err) {
+      console.error('Error deleting geo point:', err);
+      // show error message
     }
   };
 
@@ -230,6 +290,147 @@ const PeriodDetail: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* GeoPoints */}
+          <Card
+            title="Mapa y Puntos de Interés"
+            icon={<Map size={18} className="mr-2" />}
+            actions={
+              canEdit ? (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  leftIcon={<PlusCircle size={16} />}
+                  onClick={() => setShowAddGeoPointModal(true)}
+                >
+                  Añadir Punto
+                </Button>
+              ) : undefined
+            }
+          >
+            <div className="space-y-4">
+              {/* Mapa con KML y puntos */}
+              <div className="h-96 relative">
+                {loadingGeoPoints ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                  </div>
+                ) : (
+                  <MapViewer
+                    kmlUrl={period.kmlFile ? `/api/files/${period.kmlFile.id}/download` : undefined}
+                    geoPoints={geoPoints}
+                    onPointClick={handleGeoPointClick}
+                    height="100%"
+                  />
+                )}
+              </div>
+
+              {/* Tabla de puntos */}
+              {geoPoints.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold mb-2">Puntos de Interés</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="py-2 px-4 text-left">Kilómetro</th>
+                          <th className="py-2 px-4 text-left">Sección</th>
+                          <th className="py-2 px-4 text-left">Gravedad</th>
+                          <th className="py-2 px-4 text-left">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {geoPoints.map((point) => (
+                          <tr key={point.id} className="hover:bg-gray-50">
+                            <td className="py-2 px-4">{point.kilometer || 'N/A'}</td>
+                            <td className="py-2 px-4">{point.section || 'N/A'}</td>
+                            <td className="py-2 px-4">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                point.gravityLevel === 1 ? 'bg-green-100 text-green-800' :
+                                point.gravityLevel === 2 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {point.gravityLevel === 1 ? 'Bajo' :
+                                point.gravityLevel === 2 ? 'Medio' :
+                                'Alto'}
+                              </span>
+                            </td>
+                            <td className="py-2 px-4">
+                              <div className="flex space-x-2">
+                                <button
+                                  className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                                  title="Ver detalles"
+                                  onClick={() => handleGeoPointClick(point)}
+                                >
+                                  <Eye size={16} />
+                                </button>
+
+                                {canEdit && (
+                                  <>
+                                    <button
+                                      className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                                      title="Editar"
+                                      onClick={() => {
+                                        setSelectedGeoPoint(point);
+                                        setShowAddGeoPointModal(true);
+                                      }}
+                                    >
+                                      <Edit size={16} />
+                                    </button>
+
+                                    <button
+                                      className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                      title="Eliminar"
+                                      onClick={() => handleDeleteGeoPoint(point.id)}
+                                    >
+                                      <Trash size={16} />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {geoPoints.length === 0 && !loadingGeoPoints && (
+                <div className="text-center py-4 text-gray-500">
+                  No hay puntos de interés registrados para este periodo.
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Modal para detalles de punto */}
+          {selectedGeoPoint && !showAddGeoPointModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <GeoPointDetails
+                geoPoint={selectedGeoPoint}
+                onClose={() => setSelectedGeoPoint(null)}
+                className="max-w-4xl mx-4"
+              />
+            </div>
+          )}
+
+          {/* Modal para añadir/editar punto */}
+          {showAddGeoPointModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <GeoPointEditor
+                periodId={periodId || ''}
+                geoPoint={selectedGeoPoint || undefined}
+                onClose={() => {
+                  setShowAddGeoPointModal(false);
+                  setSelectedGeoPoint(null);
+                }}
+                onSave={handleGeoPointSave}
+                className="max-w-4xl mx-4"
+              />
+            </div>
+          )}
 
           {/* Water metrics */}
           <div>

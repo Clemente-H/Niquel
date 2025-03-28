@@ -1,4 +1,5 @@
 import { IProjectFile } from './project.types';
+import { IGeoPoint } from './geoPoint.types';
 
 export interface IPeriod {
   id: number;
@@ -11,6 +12,9 @@ export interface IPeriod {
   width?: string; // metros
   maxDepth?: string; // centímetros
   notes?: string;
+  kmlFileId?: string; // ID del archivo KML principal
+  kmlFile?: IProjectFile; // Referencia al archivo KML
+  geoPoints?: IGeoPoint[]; // Puntos geográficos asociados
   maps?: IProjectFile[]; // archivos de tipo mapa
   images?: IProjectFile[]; // imágenes asociadas
   analysisFiles?: IProjectFile[]; // archivos de análisis
@@ -29,6 +33,7 @@ export interface IPeriodCreate {
   width?: string;
   maxDepth?: string;
   notes?: string;
+  kmlFileId?: string; // ID del archivo KML principal
 }
 
 export interface IPeriodUpdate {
@@ -40,6 +45,7 @@ export interface IPeriodUpdate {
   width?: string;
   maxDepth?: string;
   notes?: string;
+  kmlFileId?: string; // ID del archivo KML principal
 }
 
 export interface IPeriodAnalysis {
