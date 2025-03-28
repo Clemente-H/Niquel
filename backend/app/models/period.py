@@ -17,6 +17,7 @@ class PeriodBase(BaseSchema):
     width: Optional[float] = None
     max_depth: Optional[float] = None
     notes: Optional[str] = None
+    kml_file_id: Optional[UUID] = None
 
 
 # Properties to receive via API on creation
@@ -49,7 +50,7 @@ class PeriodInDBBase(PeriodBase, TimeStampModel):
 class Period(PeriodInDBBase):
     """Schema for Period responses."""
 
-    pass
+    geo_points: List["GeoPoint"] = []
 
 
 # Schema for multiple periods with pagination

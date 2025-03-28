@@ -32,3 +32,12 @@ from app.models.assignment import (
     UserAssignmentWithUser,
     BatchAssignment,
 )
+from app.models.geo_point import (
+    GeoPoint,
+    GeoPointCreate,
+    GeoPointUpdate,
+    PaginatedGeoPoints,
+    GeoPointWithImages,
+    GeoPointImage,
+    GeoPointImageCreate,
+)

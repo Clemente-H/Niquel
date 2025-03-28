@@ -46,5 +46,18 @@ class Period(Base):
         cascade="all, delete-orphan",
     )
 
+    # Reference to the main KML file
+    kml_file_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("file.id", ondelete="SET NULL"), nullable=True
+    )
+    kml_file: Mapped[Optional["File"]] = relationship(
+        "File", foreign_keys=[kml_file_id]
+    )
+
+    # Geo points associated with this period
+    geo_points: Mapped[List["GeoPoint"]] = relationship(
+        "GeoPoint", back_populates="period", cascade="all, delete-orphan"
+    )
+
     def __repr__(self) -> str:
         return f"<Period {self.name} ({self.start_date} to {self.end_date})>"
