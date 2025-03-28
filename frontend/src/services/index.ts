@@ -6,6 +6,7 @@ import projectService from './projectService';
 import periodService from './periodService';
 import fileService from './fileService';
 import assignmentService from './assignmentService';
+import geoPointService from './geoPointService';
 
 // Exportar todos los servicios desde un solo punto
 export {
@@ -15,5 +16,6 @@ export {
   projectService,
   periodService,
   fileService,
-  assignmentService
+  assignmentService,
+  geoPointService
 };
