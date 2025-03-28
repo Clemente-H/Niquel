@@ -44,7 +44,12 @@ class File(Base):
     project: Mapped[Optional["Project"]] = relationship(
         "Project", back_populates="files"
     )
-    period: Mapped[Optional["Period"]] = relationship("Period", back_populates="files")
+    period: Mapped[Optional["Period"]] = relationship(
+        "Period",
+        primaryjoin="File.period_id == Period.id",
+        foreign_keys="[File.period_id]",
+        back_populates="files",
+    )
     uploader: Mapped[Optional["User"]] = relationship(
         "User", back_populates="uploaded_files", foreign_keys=[uploaded_by]
     )

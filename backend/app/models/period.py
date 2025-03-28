@@ -1,8 +1,11 @@
 from datetime import date, time
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 from uuid import UUID
 
-from app.models.base import BaseSchema, TimeStampModel, Paginated
+from app.models.base import BaseSchema, TimeStampModel
+
+if TYPE_CHECKING:
+    from app.models.geo_point import GeoPoint
 
 
 # Shared properties
@@ -54,10 +57,14 @@ class Period(PeriodInDBBase):
 
 
 # Schema for multiple periods with pagination
-class PaginatedPeriods(Paginated[Period]):
+class PaginatedPeriods(BaseSchema):
     """Schema for paginated period responses."""
 
     items: List[Period]
+    total: int
+    page: int
+    page_size: int
+    pages: int
 
 
 # Schema for period with additional information

@@ -4,7 +4,7 @@ import uuid
 import datetime
 from typing import List, Optional
 
-from sqlalchemy import String, ForeignKey, Date, Text, Float, Time
+from sqlalchemy import String, ForeignKey, Date, Text, Float, Time, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -42,16 +42,19 @@ class Period(Base):
 
     files: Mapped[List["File"]] = relationship(
         "File",
+        primaryjoin="Period.id == File.period_id",
+        foreign_keys="[File.period_id]",
         back_populates="period",
         cascade="all, delete-orphan",
     )
 
     # Reference to the main KML file
-    kml_file_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        ForeignKey("file.id", ondelete="SET NULL"), nullable=True
-    )
+    kml_file_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid, nullable=True)
     kml_file: Mapped[Optional["File"]] = relationship(
-        "File", foreign_keys=[kml_file_id]
+        "File",
+        primaryjoin="File.id == Period.kml_file_id",
+        uselist=False,
+        viewonly=True,  # Marca como solo lectura
     )
 
     # Geo points associated with this period

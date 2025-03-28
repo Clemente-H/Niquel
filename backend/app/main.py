@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import pydantic
 
 from app.core.config import settings
 from app.api.routes import (
@@ -13,6 +14,8 @@ from app.api.routes import (
     geo_points,
 )
 
+pydantic.TypeAdapter.source_error_just_once = True
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO if settings.DEBUG else logging.WARNING,
@@ -24,6 +27,7 @@ app = FastAPI(
     title="Niquel API",
     description="Backend API for Niquel Project Management System",
     version="0.1.0",
+    openapi_url=None if settings.ENVIRONMENT == "development" else "/openapi.json",
 )
 
 # Configure CORS
