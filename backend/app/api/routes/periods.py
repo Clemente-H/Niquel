@@ -56,13 +56,13 @@ async def get_project_periods(
     result = await db.execute(query)
     periods = result.scalars().all()
 
-    return {
-        "items": periods,
-        "total": total,
-        "page": skip // limit + 1 if limit > 0 else 1,
-        "page_size": limit,
-        "pages": (total + limit - 1) // limit if limit > 0 else 1,
-    }
+    return PaginatedPeriods(
+        items=periods,
+        total=total,
+        page=skip // limit + 1 if limit > 0 else 1,
+        page_size=limit,
+        pages=(total + limit - 1) // limit if limit > 0 else 1,
+    )
 
 
 @router.post(

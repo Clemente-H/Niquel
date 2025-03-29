@@ -257,16 +257,6 @@ const ProjectDetail: React.FC = () => {
 
               {selectedPeriod && (
                 <>
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    leftIcon={<Eye size={16} />}
-                    as={Link}
-                    to={`/projects/${id}/periods/${selectedPeriod}`}
-                  >
-                    View Period Details
-                  </Button>
-
                   {hasAdminAccess && (
                     <Button
                       variant="secondary"
@@ -278,16 +268,6 @@ const ProjectDetail: React.FC = () => {
                       Edit Period
                     </Button>
                   )}
-
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    leftIcon={<BarChart size={16} />}
-                    as={Link}
-                    to={`/projects/${id}/periods/${selectedPeriod}/visualization`}
-                  >
-                    View Analysis
-                  </Button>
                 </>
               )}
             </div>

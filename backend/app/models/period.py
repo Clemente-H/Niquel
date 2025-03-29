@@ -1,16 +1,79 @@
+# app/models/period.py
+from typing import List, Optional
 from datetime import date, time
-from typing import List, Optional, TYPE_CHECKING
 from uuid import UUID
+from pydantic import BaseModel
 
-from app.models.base import BaseSchema, TimeStampModel
-
-if TYPE_CHECKING:
-    from app.models.geo_point import GeoPoint
+# NO USAR from app.models.geo_point import GeoPoint
+# en este archivo para evitar importaciones circulares
 
 
-# Shared properties
-class PeriodBase(BaseSchema):
-    """Base schema for Period."""
+# Definición básica que no causa importaciones circulares
+class Period(BaseModel):
+    """Schema for Period responses."""
+
+    id: UUID
+    project_id: UUID
+    name: str
+    start_date: date
+    end_date: date
+    volume: Optional[float] = None
+    start_time: Optional[time] = None
+    width: Optional[float] = None
+    max_depth: Optional[float] = None
+    notes: Optional[str] = None
+    created_by: Optional[UUID] = None
+    kml_file_id: Optional[UUID] = None
+
+    # Definir configuración del modelo
+    model_config = {"from_attributes": True}
+
+
+# Solución para el problema de PaginatedPeriods
+class PaginatedPeriods(BaseModel):
+    """Schema for paginated period responses."""
+
+    items: List[Period]
+    total: int
+    page: int
+    page_size: int
+    pages: int
+
+    # Definir configuración del modelo
+    model_config = {"from_attributes": True}
+
+
+# Period con detalles adicionales
+class PeriodWithDetails(Period):
+    """Schema for Period with additional details."""
+
+    file_count: int
+
+    # Definir configuración del modelo
+    model_config = {"from_attributes": True}
+
+
+# Definiciones para creación y actualización
+class PeriodCreate(BaseModel):
+    """Schema for creating a new period."""
+
+    name: str
+    start_date: date
+    end_date: date
+    project_id: UUID
+    volume: Optional[float] = None
+    start_time: Optional[time] = None
+    width: Optional[float] = None
+    max_depth: Optional[float] = None
+    notes: Optional[str] = None
+    kml_file_id: Optional[UUID] = None
+
+    # Definir configuración del modelo
+    model_config = {"from_attributes": True}
+
+
+class PeriodUpdate(BaseModel):
+    """Schema for updating a period."""
 
     name: Optional[str] = None
     start_date: Optional[date] = None
@@ -22,53 +85,5 @@ class PeriodBase(BaseSchema):
     notes: Optional[str] = None
     kml_file_id: Optional[UUID] = None
 
-
-# Properties to receive via API on creation
-class PeriodCreate(PeriodBase):
-    """Schema for creating a new period."""
-
-    name: str
-    start_date: date
-    end_date: date
-    project_id: UUID
-
-
-# Properties to receive via API on update
-class PeriodUpdate(PeriodBase):
-    """Schema for updating a period."""
-
-    pass
-
-
-# Properties shared by models returned from API
-class PeriodInDBBase(PeriodBase, TimeStampModel):
-    """Base schema for DB Period with ID."""
-
-    id: UUID
-    project_id: UUID
-    created_by: Optional[UUID] = None
-
-
-# Additional properties to return via API
-class Period(PeriodInDBBase):
-    """Schema for Period responses."""
-
-    geo_points: List["GeoPoint"] = []
-
-
-# Schema for multiple periods with pagination
-class PaginatedPeriods(BaseSchema):
-    """Schema for paginated period responses."""
-
-    items: List[Period]
-    total: int
-    page: int
-    page_size: int
-    pages: int
-
-
-# Schema for period with additional information
-class PeriodWithDetails(Period):
-    """Schema for Period with additional details."""
-
-    file_count: int
+    # Definir configuración del modelo
+    model_config = {"from_attributes": True}
